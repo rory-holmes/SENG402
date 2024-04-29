@@ -3,14 +3,12 @@ import torch
 import torchvision.models.segmentation
 import torchvision.transforms as tf
 import numpy as np
-from PIL import Image
 import os
 
-training_folder="Training"
-training_images=os.listdir("Training\Images")
-training_masks=os.listdir("Training\Masks")
-validation_images=os.listdir("Validation\Images")
-validation_masks=os.listdir("Validation\Masks")
+training_folder="Data"
+training_images=os.listdir("Data\Images")
+training_masks=os.listdir("Data\Masks")
+
 width = 640
 height = 480
 batchSize=4
@@ -29,13 +27,10 @@ def ReadRandomImage():
     if class_map is not None: 
         for idx, i in enumerate(AnnMap):
             for idx2, j in enumerate(i):
-                if np.array_equal(class_map[idx][idx2], np.array([160, 160, 160])):
+                if np.array_equal(j, np.array([160, 160, 160])):
                     AnnMap[idx][idx2] = 1
-                if np.array_equal(class_map[idx][idx2], np.array([70,70,70])):
+                if np.array_equal(j, np.array([70,70,70])):
                     AnnMap[idx][idx2] = 2
-
-        #AnnMap[ class_map == np.array("(160 160 160)") ] = 1    
-        #AnnMap[ class_map == np.array("(70 70 70)") ] = 2  
     Img=transformImg(Img)
     AnnMap=transformAnn(AnnMap)  
     return Img,AnnMap
@@ -65,7 +60,8 @@ for itr in range(20000):
     Loss = criterion(Pred, ann.long())
     Loss.backward()
     optimizer.step()
-    if itr % 1000 == 0: 
+    if itr % 100 == 0: 
         print("Saving Model" +str(itr) + ".torch")
         torch.save(Net.state_dict(), str(itr) + ".torch")
         print("Saved model", str(itr))
+    print(itr)
