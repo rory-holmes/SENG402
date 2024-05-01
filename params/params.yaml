@@ -1,0 +1,5 @@
+data_path: "Data"
+training_path: "Training"
+validation_path: "Validation"
+data_type: ".mp4"
+annotation_type: ".txt"
