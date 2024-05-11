@@ -8,6 +8,7 @@ with open("params\params.yaml", "r") as f:
 def delete_file_type(path, filetype):
     """
     Deletes files of type filetype in path
+
     Inputs:
     path - paths.yaml header - validation
     filetype - in the format .filetype - .txt
@@ -17,12 +18,12 @@ def delete_file_type(path, filetype):
         if file.endswith(filetype):
             os.remove(os.path.join(params.get(path), file))
 
-def split_data(split):
+def split_data():
     """
     Splits data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
-    Inputs:
-    split - percentage to be trained on - 70
+    Params from params.yaml
     """
+    split = params.get("training_split")
     data = os.listdir(params.get("data_path")) 
     videos= []
     annotations = []
@@ -46,7 +47,8 @@ def split_data(split):
 
 def return_data():
     """
-    Returns data from training and validation folders to data folder (path specified in params)
+    Returns data from 'training_path' and 'validation_path'  to 'data_path' folder.
+    Params from params.yaml
     """
     training = os.listdir(params.get("training_path"))
     validation = os.listdir(params.get("validation_path"))
@@ -55,10 +57,3 @@ def return_data():
     for d in validation:
         os.rename(os.path.join(params.get("validation_path"), d), os.path.join(params.get("data_path"), d))
 
-#===========================================================
-def main():
-    #delete_file_type("data", ".txt")
-    #split_data(80)
-    return_data()
-if __name__ == "__main__":
-    main()

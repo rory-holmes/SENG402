@@ -1,0 +1,4 @@
+data/**
+training/**
+validation/**
+utils/__pycache__
