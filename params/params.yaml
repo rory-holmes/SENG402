@@ -1,10 +1,15 @@
-data_path: "data"
-training_path: "training"
-validation_path: "validation"
-data_type: ".mp4"
-annotation_type: ".txt"
-frame_rate: 25
-model_width: 256
-model_height: 256
-colour_chanel: "BGR"
-training_split: 90
+origin_path:
+  data: "data/videos"
+  annotations: "data/annotations"
+training_path:
+  data: "training/videos"
+  annotations: "training/annotations"
+validation_path:
+  data: "validation/videos"
+  annotations: "validation/annotations"
+file_formats:
+  data_type: ".mp4"
+  annotation_type: ".txt"
+settings:
+  frame_rate: 25
+  colour_chanel: "BGR"
