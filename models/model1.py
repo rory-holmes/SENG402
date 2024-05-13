@@ -5,41 +5,28 @@ import tensorflow as tf
 from keras import layers
 from keras.models import Sequential
 import yaml
-import sys
+import logging
 
 with open("params\model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-img_height = model_params["image_height"]
-img_width = model_params["image_width"]
-channels = model_params["channels"]
-num_classes = model_params["num_classes"]
-def get_sequential_model():
-    model = Sequential([
-        layers.Rescaling(1./255, input_shape=(img_height, img_width, channels)),
-        layers.Conv2D(16, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(64, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dense(num_classes)
-        ])
-    return model
-
 class Model:
-    def __init__(self, get_model=get_sequential_model):
+    def __init__(self):
         self.training_data = []
         self.validation_data = []
+        self.model = None
         self.epochs = model_params['epochs']
-        self.model = get_model()
+        self.img_height = model_params["image_height"]
+        self.img_width = model_params["image_width"]
+        self.channels = model_params["channels"]
+        self.num_classes = model_params["num_classes"]
+        self.name = "NULL"
 
     def train(self):
+        logging.info(f" {self.name}: Training started")
         self.model.compile(
             optimizer='adam',
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            loss="binary_crossentropy",
             metrics=['accuracy']
             )
         history = self.model.fit(
@@ -47,6 +34,23 @@ class Model:
             validation_data=self.validation_data,
             epochs=self.epochs
         )
-        print(self.model.evaluate(self.validation_data))
+        logging.info(f" {self.name}: Training completed")
+        return self.model.evaluate(self.validation_data)
         #TODO fix: ValueError: `labels.shape` must equal `logits.shape` except for the last dimension. Received: labels.shape=(7,) and logits.shape=(1, 7)
 
+class Sequential_Model(Model):
+    def __init__(self):
+        super().__init__()
+        self.model = Sequential([
+            layers.Rescaling(1./255, input_shape=(self.img_height, self.img_width, self.channels)),
+            layers.Conv2D(16, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(32, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Flatten(),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(self.num_classes)
+        ])
+        self.name = "Sequential"
