@@ -2,6 +2,7 @@ import cv2
 import yaml
 import tensorflow as tf
 import os
+import logging
 with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
@@ -33,19 +34,24 @@ def extract_data(folder_path):
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
     
+    logging.info(f" {folder_path}: Extracting data from frames")
     frame_stack = []
-    for video in os.listdir(video_path):
+    for index, video in enumerate(os.listdir(video_path)):
+        logging.info(f"Processing video {index+1}")
         frames = get_frames(os.path.join(video_path, video))
         frame_stack.append(frames)
     frame_stack = tf.convert_to_tensor(frame_stack)
 
+    logging.info(f" {folder_path}: Extracting data from annotations")
     annotation_stack = []
-    for file in os.listdir(annotation_path):
+    for index, file in enumerate(os.listdir(annotation_path)):
+        logging.info(f"Processing annotation {index+1}")
         annotation = get_labels(os.path.join(annotation_path, file))
         annotation_stack.append(annotation)
-    print(annotation_stack) #TODO remove this
+    #print(annotation_stack) #TODO remove this
     annotation_stack = tf.convert_to_tensor(annotation_stack)
 
+    logging.info(f" {folder_path}: Returning extracted data")
     return tf.data.Dataset.from_tensor_slices((frame_stack, annotation_stack))
 
 def get_labels(path):
@@ -68,8 +74,8 @@ def get_labels(path):
         #Labels contain a \n at the end of the line
         label[-1] = label[-1][0]
         #Lables have a frame annotation
-        labels.append(label[1:])
-        break #TODO Remove this line
+        labels.append([int(l) for l in label[1:]])
+        #break #TODO Remove this line
     return labels
 
 def get_frames(video_path):
@@ -93,7 +99,7 @@ def get_frames(video_path):
             if count % frame_rate == 0: #If correct frame_rate
                 frame = resize_frame(frame)
                 frames.append(frame)
-                break #TODO remove this
+                #break #TODO remove this
         else:
             break
         count += 1
