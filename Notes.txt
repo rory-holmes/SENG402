@@ -1,0 +1,7 @@
+Initial loss function was using sparse cross entropy loss.
+    This was bad as it was throwing a mismatch of labels and logits. The output for this was a probability distribution of target classes.
+    Solution was to change this to binary_crossentropy.
+
+Computer has run out of memory when loading all frames from all the videos.
+    Solution is to alter the pipeline to receive one video at a time.
+
