@@ -22,21 +22,28 @@ class Model:
         self.num_classes = model_params["num_classes"]
         self.name = "NULL"
 
-    def train(self):
-        logging.info(f" {self.name}: Training started")
+    def compile(self):
+        """
+        Compiles model.
+        Params from model_params.yaml
+        """
         self.model.compile(
-            optimizer='adam',
-            loss="binary_crossentropy",
-            metrics=['accuracy']
-            )
+            optimizer= model_params['optimizer'],
+            loss= model_params["loss"],
+            metrics= model_params['metrics']
+        )
+
+    def train(self, dataset):
+        """
+        Trains model on dataset
+        """
+        self.compile()
         history = self.model.fit(
-            x=self.training_data,
-            validation_data=self.validation_data,
+            x=dataset('training'),
+            validation_data=dataset('validation'),
             epochs=self.epochs
         )
-        logging.info(f" {self.name}: Training completed")
-        return self.model.evaluate(self.validation_data)
-        #TODO fix: ValueError: `labels.shape` must equal `logits.shape` except for the last dimension. Received: labels.shape=(7,) and logits.shape=(1, 7)
+        return history
 
 class Sequential_Model(Model):
     def __init__(self):

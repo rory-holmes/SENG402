@@ -5,3 +5,6 @@ num_classes: 7
 epochs: 10
 batch_size: 32
 training_split: 90
+optimizer: 'adam'
+loss: "binary_crossentropy"
+metrics: "accuracy"
