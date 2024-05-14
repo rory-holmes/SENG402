@@ -48,7 +48,7 @@ def split_data():
     for video, annotation in zipped_data[training_amount:]:
         os.rename(os.path.join(params['origin_path']['data'], video), os.path.join(params['validation_path']['data'], video))
         os.rename(os.path.join(params['origin_path']['annotations'], annotation), os.path.join(params['validation_path']['annotations'], annotation))
-    logging.info("Data has been split")
+    logging.info("  Data has been split")
 
 def return_data():
     """
@@ -63,5 +63,5 @@ def return_data():
         folder = os.listdir(key)
         for file in folder:
             os.rename(os.path.join(key, file), os.path.join(origin_to_end[key], file))
-    logging.info("Returned data")
+    logging.info("  Returned data")
 return_data()

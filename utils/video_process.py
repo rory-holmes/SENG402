@@ -16,14 +16,15 @@ frame_rate = params['settings']["frame_rate"]
 
 def extract_data(folder_path):
     """
-    Extracts all frames and labels within paths provided and converts into tensors.
+    Extracts all frames and labels within paths provided and converts into tensors, 
+    yields dataset object for training or validation.
     Params from params.yaml
 
     Input:
     folder_path - Either 'training' or 'validation'
 
-    Returns:
-    dataset - TensorFlow dataset from tensor slices of frames and annotations
+    Yield:
+    dataset - TensorFlow dataset from tensor slices of frames and annotations for each video
     """
     if folder_path == 'training':
         video_path = params['training_path']['data']
@@ -33,26 +34,16 @@ def extract_data(folder_path):
         annotation_path = params['validation_path']['annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
-    
-    logging.info(f" {folder_path}: Extracting data from frames")
-    frame_stack = []
-    for index, video in enumerate(os.listdir(video_path)):
-        logging.info(f"Processing video {index+1}")
+
+    for video, file in zip(os.listdir(video_path), os.listdir(annotation_path)):
+        logging.info(f"  Extracting frames from {video}")
         frames = get_frames(os.path.join(video_path, video))
-        frame_stack.append(frames)
-    frame_stack = tf.convert_to_tensor(frame_stack)
-
-    logging.info(f" {folder_path}: Extracting data from annotations")
-    annotation_stack = []
-    for index, file in enumerate(os.listdir(annotation_path)):
-        logging.info(f"Processing annotation {index+1}")
-        annotation = get_labels(os.path.join(annotation_path, file))
-        annotation_stack.append(annotation)
-    #print(annotation_stack) #TODO remove this
-    annotation_stack = tf.convert_to_tensor(annotation_stack)
-
-    logging.info(f" {folder_path}: Returning extracted data")
-    return tf.data.Dataset.from_tensor_slices((frame_stack, annotation_stack))
+        annotations = get_labels(os.path.join(annotation_path, file))
+        #If frame and annotation shape not the same size
+        if len(frames) != len(annotations):
+            logging.error(f"    Frame being trimmed from len {len(frames)} to {len(annotations)}")
+            frames = frames[:len(annotations)]
+        yield ((tf.convert_to_tensor(frames), tf.convert_to_tensor(annotations)))
 
 def get_labels(path):
     """
@@ -120,18 +111,4 @@ def resize_frame(frame):
     else: # Else keep BGR
         frame = cv2.resize(frame, (n_h, n_w)) /255
     return frame
-
-def frame_generator(video_list):
-    """
-    Generator function to yield frames from a framestack of multiple videos
-    
-    Input:
-    video_list - A list of all the frames within all the videos
-    
-    Yields:
-    A single frame in sequential order
-    """
-    for video_frames in video_list:
-        for frame in video_frames:
-            yield frame
 
