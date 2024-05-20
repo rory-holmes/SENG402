@@ -1,12 +1,14 @@
 import os
-import os
 import random
 import yaml
 import logging
-with open("params\params.yaml", "r") as f:
+import sys
+sys.path.append('params')
+
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params\model_params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def delete_file_type(path, filetype):
@@ -36,7 +38,7 @@ def split_data():
         videos.append(d)
     for a in origin_annotations:
         annotations.append(a)
-        
+        params/params.yaml
     zipped_data = list(zip(videos, annotations))
     random.shuffle(zipped_data)
     training_amount = round(len(zipped_data)*split/100)
@@ -64,4 +66,17 @@ def return_data():
         for file in folder:
             os.rename(os.path.join(key, file), os.path.join(origin_to_end[key], file))
     logging.info("  Returned data")
-return_data()
+
+def setup():
+    logging.info("Checking if directories are setup")
+    paths = [params['origin_path'], params['training_path'], params['validation_path']]
+    for path in paths:
+        for folder_path in path.values():
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+                logging.info(f"Created folder: {folder_path}")
+            else:
+                logging.info(f"Folder already exists: {folder_path}")
+    logging.info("Setup completed")
+    
+setup()
