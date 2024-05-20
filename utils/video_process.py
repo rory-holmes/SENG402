@@ -3,10 +3,10 @@ import yaml
 import tensorflow as tf
 import os
 import logging
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
+with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
+with open("params\model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
@@ -37,13 +37,18 @@ def extract_data(folder_path):
         raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
     all_frames = []
     all_annotations = []
+    count = 0
     for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
         logging.info(f"  Extracting frames from {video} and {file}")
         frames = get_frames(os.path.join(video_path, video))
         annotations = get_labels(os.path.join(annotation_path, file))
+        if len(frames) != len(annotations):
+            frames = frames[:len(annotations)]
         all_frames.extend(frames)
         all_annotations.extend(annotations)
-
+        count += 1
+        if count >= 1:
+            break
     dataset = tf.data.Dataset.from_tensor_slices((all_frames, all_annotations))
     dataset = dataset.batch(batch_size)
     return dataset

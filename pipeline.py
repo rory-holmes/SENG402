@@ -5,12 +5,12 @@ sys.path.append('models')
 import utils.file_helpers as fh
 import utils.video_process as vp
 import utils.global_helpers as gp
-from models.model1 import Model, Sequential_Model
+from models.model1 import Model, Sequential_Model, ResNet50_Model
 import tensorflow as tf
 import os
 import logging
 
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
+with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def forward_pass(model):
@@ -21,7 +21,7 @@ def forward_pass(model):
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
-    forward_pass(Sequential_Model())
+    forward_pass(ResNet50_Model())
 
 if __name__ == "__main__":
     main()

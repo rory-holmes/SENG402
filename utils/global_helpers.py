@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import yaml
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
+with open("params\model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def show_results(history):
