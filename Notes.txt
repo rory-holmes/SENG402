@@ -5,3 +5,7 @@ Initial loss function was using sparse cross entropy loss.
 Computer has run out of memory when loading all frames from all the videos.
     Solution is to alter the pipeline to receive one video at a time.
 
+For evaluations:
+    Use cross entropy loss function, gets raw output. Can see if learning or overfitting.
+    Confusion matrix. F1 score.
+    
