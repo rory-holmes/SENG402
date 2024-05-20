@@ -3,16 +3,17 @@ import yaml
 import tensorflow as tf
 import os
 import logging
-with open("params\params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params\model_params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
 n_h = model_params.get("image_height")
 colour_chanel = params['settings']["colour_chanel"]
 frame_rate = params['settings']["frame_rate"]
+batch_size = model_params['batch_size']
 
 def extract_data(folder_path):
     """
@@ -34,16 +35,18 @@ def extract_data(folder_path):
         annotation_path = params['validation_path']['annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
-
-    for video, file in zip(os.listdir(video_path), os.listdir(annotation_path)):
-        logging.info(f"  Extracting frames from {video}")
+    all_frames = []
+    all_annotations = []
+    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
+        logging.info(f"  Extracting frames from {video} and {file}")
         frames = get_frames(os.path.join(video_path, video))
         annotations = get_labels(os.path.join(annotation_path, file))
-        #If frame and annotation shape not the same size
-        if len(frames) != len(annotations):
-            logging.error(f"    Frame being trimmed from len {len(frames)} to {len(annotations)}")
-            frames = frames[:len(annotations)]
-        yield ((tf.convert_to_tensor(frames), tf.convert_to_tensor(annotations)))
+        all_frames.extend(frames)
+        all_annotations.extend(annotations)
+
+    dataset = tf.data.Dataset.from_tensor_slices((all_frames, all_annotations))
+    dataset = dataset.batch(batch_size)
+    return dataset
 
 def get_labels(path):
     """
@@ -56,8 +59,8 @@ def get_labels(path):
     Returns:
     labels - A list of all class labels within a video
     """
-    labels = []
     file = open(path, "r")
+    labels = []
     #Label file contains a header
     for label in file.readlines()[1:]:
         #Labels are separated by \t
@@ -65,8 +68,9 @@ def get_labels(path):
         #Labels contain a \n at the end of the line
         label[-1] = label[-1][0]
         #Lables have a frame annotation
-        labels.append([int(l) for l in label[1:]])
+        label = [int(l) for l in label[1:]]
         #break #TODO Remove this line
+        labels.append(label)
     return labels
 
 def get_frames(video_path):
@@ -80,9 +84,9 @@ def get_frames(video_path):
     Returns:
     List of raw frames from video_path
     """
-    frames = []
     count = 0
     cap = cv2.VideoCapture(video_path)
+    frames = []
     flag = True
     while flag:
         flag, frame = cap.read()

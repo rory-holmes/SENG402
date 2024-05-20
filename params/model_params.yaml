@@ -4,7 +4,7 @@ channels: 3
 num_classes: 7
 epochs: 10
 batch_size: 32
-training_split: 90
+training_split: 80
 optimizer: 'adam'
 loss: "binary_crossentropy"
 metrics: "accuracy"

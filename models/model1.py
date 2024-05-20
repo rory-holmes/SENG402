@@ -7,7 +7,7 @@ from keras.models import Sequential
 import yaml
 import logging
 
-with open("params\model_params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 class Model:
@@ -33,14 +33,19 @@ class Model:
             metrics= model_params['metrics']
         )
 
-    def train(self, dataset):
+    def train(self, dataset_func):
         """
         Trains model on dataset
         """
         self.compile()
+        logging.info("Extracting training data")
+        training_data = dataset_func('training')
+        logging.info("Extracting validation data")
+        validation_data = dataset_func('validation')
+        logging.info("Training model")
         history = self.model.fit(
-            x=dataset('training'),
-            validation_data=dataset('validation'),
+            x=training_data,
+            validation_data=validation_data,
             epochs=self.epochs
         )
         return history
