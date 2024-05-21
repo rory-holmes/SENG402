@@ -7,6 +7,8 @@ from keras.optimizers import Adam
 from keras.models import Sequential, Model
 import yaml
 import logging
+import os
+from statistics import mean 
 
 with open("params\model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -17,6 +19,7 @@ class Base_Model:
         self.validation_data = []
         self.model = None
         self.epochs = model_params['epochs']
+        self.batch_size = model_params['batch_size']
         self.img_height = model_params["image_height"]
         self.img_width = model_params["image_width"]
         self.channels = model_params["channels"]
@@ -47,14 +50,60 @@ class Base_Model:
         validation_data = dataset_func('validation')
         logging.info("Training model")
         history = self.model.fit(
-            x=training_data,
+            training_data,
             validation_data=validation_data,
             epochs=self.epochs
         )
-        #TODO: Save model after running
         self.model.save(f"{self.name}.keras")
         return history
-
+    
+    def train_on_batch(self, dataset):
+        self.compile()
+        history = []
+        for epoch in range(self.epochs):
+            print(f"Epoch {epoch+1}/{self.epochs}")
+            self.model.reset_metrics()
+            batch_loss = []
+            batch_accuracy = []
+            for batch_frames, batch_annotations in dataset("training", self.batch_size):
+                # Train on batch
+                loss, accuracy = self.model.train_on_batch(batch_frames, batch_annotations)
+                batch_loss.append(loss)
+                batch_accuracy.append(accuracy)
+            # Print batch metrics (optional)
+            print(f"Epoch Loss: {mean(batch_loss):.4f}, Epoch Accuracy: {mean(batch_accuracy):.4f}")
+            # Evaluate on validation data after each epoch
+            val_loss, val_accuracy = self.evaluate_on_batch(dataset)
+            print(f"Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}")
+            history.append(f"Epoch {epoch+1}:   Loss: {mean(batch_loss)}, Accuracy: {mean(batch_accuracy)}, val_loss: {val_loss}, val_accuracy: {val_accuracy}")
+       
+        self.model.save(f"{self.name}.keras")
+        return history
+    def evaluate_on_batch(self, dataset):
+            # Initialize metrics
+        total_loss = 0.0
+        total_accuracy = 0.0
+        num_batches = 0
+        validation_steps = len(os.listdir("validation\annotations"))
+        val_generator = dataset("validation", self.batch_size)
+        # Iterate over validation batches
+        for _ in range(validation_steps):
+            val_batch_frames, val_batch_annotations = next(val_generator)
+            
+            # Evaluate on batch
+            loss, accuracy = self.model.evaluate(val_batch_frames, val_batch_annotations, batch_size=self.batch_size)
+            
+            # Accumulate metrics
+            total_loss += loss
+            total_accuracy += accuracy
+            num_batches += 1
+        
+        # Calculate average metrics
+        average_loss = total_loss / num_batches
+        average_accuracy = total_accuracy / num_batches
+        
+        return average_loss, average_accuracy
+    
 class Sequential_Model(Base_Model):
     def __init__(self):
         super().__init__()

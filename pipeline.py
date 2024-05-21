@@ -12,12 +12,11 @@ import logging
 
 with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
-
 def forward_pass(model):
     fh.split_data()
-    history = model.train(vp.extract_data)
+    history = model.train_on_batch(vp.data_generator)
     fh.return_data()
-    print(gp.show_results(history))
+    gp.show_results(history)
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
