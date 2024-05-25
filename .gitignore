@@ -3,3 +3,4 @@ training/**
 validation/**
 utils/__pycache__
 models/__pycache__
+*.keras

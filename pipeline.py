@@ -4,7 +4,7 @@ sys.path.append('utils')
 sys.path.append('models')
 import utils.file_helpers as fh
 import utils.video_process as vp
-import utils.global_helpers as gp
+import utils.global_helpers as gh
 from models.model1 import Model, Sequential_Model, ResNet50_Model
 import tensorflow as tf
 import os
@@ -14,9 +14,10 @@ with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 def forward_pass(model):
     fh.split_data()
-    history = model.train_on_batch(vp.data_generator)
+    history, name = model.train(vp.data_generator)
+    gh.save_history(history, name)
     fh.return_data()
-    gp.show_results(history)
+    gh.show_results(name)
 
 def main():
     logging.getLogger().setLevel(logging.INFO)

@@ -7,4 +7,4 @@ batch_size: 32
 training_split: 90
 learning_rate: 0.0001
 loss: "binary_crossentropy"
-metrics: "accuracy"
+metrics: ["accuracy", "BinaryCrossentropy"]

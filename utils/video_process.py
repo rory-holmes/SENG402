@@ -71,7 +71,7 @@ def data_generator(folder_path, batch_size):
         for i in range(0, len(frames), batch_size):
             batch_frames = np.array(frames[i:i+batch_size])
             batch_annotations = np.array(annotations[i:i+batch_size])
-            logging.info(f"{i}/{len(frames)}")
+            #logging.info(f"{i}/{len(frames)}")
             if batch_frames.shape[0] == batch_annotations.shape[0]:
                 yield (batch_frames, batch_annotations)
         count += 1

@@ -45,9 +45,9 @@ class Base_Model:
         """
         self.compile()
         logging.info("Extracting training data")
-        training_data = dataset_func('training')
+        training_data = dataset_func('training', self.batch_size)
         logging.info("Extracting validation data")
-        validation_data = dataset_func('validation')
+        validation_data = dataset_func('validation', self.batch_size)
         logging.info("Training model")
         history = self.model.fit(
             training_data,
@@ -55,7 +55,7 @@ class Base_Model:
             epochs=self.epochs
         )
         self.model.save(f"{self.name}.keras")
-        return history
+        return history, self.name
     
     def train_on_batch(self, dataset):
         self.compile()
