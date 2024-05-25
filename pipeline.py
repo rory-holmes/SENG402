@@ -22,9 +22,11 @@ def forward_pass(model):
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
-    forward_pass(ResNet50_Model())
-    forward_pass(InceptionResNetV2_Model())
-    forward_pass(VGG16_Model())
+    models = [ResNet50_Model, InceptionResNetV2_Model, VGG16_Model]
+    for m in models:
+        tf.keras.backend.clear_session()
+        forward_pass(m())
+
     
 if __name__ == "__main__":
     main()

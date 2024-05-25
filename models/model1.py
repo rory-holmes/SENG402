@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import PIL
 import tensorflow as tf
-from keras import layers, applications
+from keras import layers, applications, metrics
 from keras.optimizers import Adam
 from keras.models import Sequential, Model
 import yaml
@@ -36,7 +36,8 @@ class Base_Model:
         self.model.compile(
             optimizer= Adam(learning_rate=self.learning_rate),
             loss= model_params["loss"],
-            metrics= model_params['metrics']
+            metrics=['accuracy', metrics.Precision(), metrics.Recall()
+            ]
         )
 
     def train(self, dataset_func):

@@ -63,9 +63,9 @@ def data_generator(folder_path, batch_size):
         annotation_path = params['validation_path']['annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
-    count = 0
+
     for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
-        logging.info(f"  Extracting frames from {video} and {file}")
+        logging.info(f"\n  Extracting frames from {video} and {file}")
         frames = get_frames(os.path.join(video_path, video))
         annotations = get_labels(os.path.join(annotation_path, file))
         for i in range(0, len(frames), batch_size):
@@ -74,9 +74,6 @@ def data_generator(folder_path, batch_size):
             #logging.info(f"{i}/{len(frames)}")
             if batch_frames.shape[0] == batch_annotations.shape[0]:
                 yield (batch_frames, batch_annotations)
-        count += 1
-        if count >= 5:
-            break
 
 def get_labels(path):
     """

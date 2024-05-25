@@ -1,12 +1,12 @@
 origin_path:
-  data: "data/videos"
-  annotations: "data/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/data/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/data/annotations"
 training_path:
-  data: "training/videos"
-  annotations: "training/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/training/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/training/annotations"
 validation_path:
-  data: "validation/videos"
-  annotations: "validation/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/validation/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/validation/annotations"
 file_formats:
   data_type: ".mp4"
   annotation_type: ".txt"

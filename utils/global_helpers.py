@@ -33,6 +33,7 @@ def show_results(name):
     plt.show()
 
 def save_history(history,  name):
-    with open(f"\results\{name}_train_history", 'wb') as file_pi:
+    path = f"\results\{name}_train_history"
+    with open(path, 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
     
