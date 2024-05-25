@@ -9,3 +9,6 @@ For evaluations:
     Use cross entropy loss function, gets raw output. Can see if learning or overfitting.
     Confusion matrix. F1 score.
     
+Future models:
+    inceptionResnetV2
+    VGG16

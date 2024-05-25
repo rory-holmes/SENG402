@@ -141,3 +141,45 @@ class ResNet50_Model(Base_Model):
         # Create the complete model
         self.model = Model(inputs=base_model.input, outputs=predictions)
         self.name = "ResNet50"
+
+class InceptionResNetV2_Model(Base_Model):
+    def __init__(self, pretrained_weights="imagenet"):
+        super().__init__()
+        base_model = applications.InceptionResNetV2(
+            include_top=False,
+            weights=pretrained_weights,
+            input_tensor=None,
+            input_shape=(self.img_height, self.img_width, self.channels),
+            pooling=None,
+            classes=7,
+            classifier_activation="softmax",
+        )
+        x = base_model.output
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
+        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+
+        # Create the complete model
+        self.model = Model(inputs=base_model.input, outputs=predictions)
+        self.name = "InceptionResNetV2"
+
+class VGG16_Model(Base_Model):
+    def __init__(self, pretrained_weights="imagenet"):
+        super().__init__()
+        base_model = applications.VGG16(
+            include_top=False,
+            weights=pretrained_weights,
+            input_tensor=None,
+            input_shape=(self.img_height, self.img_width, self.channels),
+            pooling=None,
+            classes=7,
+            classifier_activation="softmax",
+        )
+        x = base_model.output
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
+        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+
+        # Create the complete model
+        self.model = Model(inputs=base_model.input, outputs=predictions)
+        self.name = "VGG16"
