@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import yaml
 import pickle
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
+with open("params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def show_results(name):
-    with open(f"results\{name}_train_history(1)", 'rb') as file_pi:
+def show_results(name=None, path=None):
+    if not (path):
+        path = f"results\{name}_train_history"
+    with open(path, 'rb') as file_pi:
         history = pickle.load(file_pi)    
     print(history)
     acc = history['accuracy']
@@ -38,5 +40,7 @@ def save_history(history,  name):
     path = f"results\{name}_train_history"
     with open(path, 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
+
+
     
-#show_results("ResNet50")
+show_results(path="E:/results_ResNet50_train_history")
