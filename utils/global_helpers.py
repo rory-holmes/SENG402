@@ -43,4 +43,4 @@ def save_history(history,  name):
 
 
     
-show_results(path="E:/results_ResNet50_train_history")
+#show_results(path="E:/results_ResNet50_train_history")

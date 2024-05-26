@@ -39,7 +39,7 @@ def extract_data(folder_path):
     all_frames = []
     all_annotations = []
     count = 0
-    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
+    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))).repeat():
         logging.info(f"  Extracting frames from {video} and {file}")
         frames = get_frames(os.path.join(video_path, video))
         annotations = get_labels(os.path.join(annotation_path, file))
@@ -61,8 +61,11 @@ def data_generator(folder_path, batch_size):
     elif folder_path == 'validation':
         video_path = params['validation_path']['data']
         annotation_path = params['validation_path']['annotations']
+    elif folder_path == 'testing':
+        video_path = params['testing_path']['data']
+        annotation_path = params['testing_path']['annotations']
     else:
-        raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
+        raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
 
     for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
         logging.info(f"\n  Extracting frames from {video} and {file}")

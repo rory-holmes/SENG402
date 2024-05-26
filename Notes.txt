@@ -12,3 +12,7 @@ For evaluations:
 Future models:
     inceptionResnetV2
     VGG16
+
+Save checkpoint with callback usage:
+    https://www.tensorflow.org/tutorials/keras/save_and_load
+    

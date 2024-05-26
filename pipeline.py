@@ -27,6 +27,9 @@ def main():
         tf.keras.backend.clear_session()
         forward_pass(m())
 
-    
+def testing():
+    Base_Model().test(vp.data_generator, made_model="ResNet50(1).keras")
+
 if __name__ == "__main__":
     main()
+    #testing()
