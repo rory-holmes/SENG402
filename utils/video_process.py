@@ -39,7 +39,7 @@ def extract_data(folder_path):
     all_frames = []
     all_annotations = []
     count = 0
-    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))).repeat():
+    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))).repeat(): #TODO Get this to work
         logging.info(f"  Extracting frames from {video} and {file}")
         frames = get_frames(os.path.join(video_path, video))
         annotations = get_labels(os.path.join(annotation_path, file))

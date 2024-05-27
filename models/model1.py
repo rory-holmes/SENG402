@@ -74,12 +74,8 @@ class Base_Model:
         for X_batch, y_batch in dataset_func("testing", self.batch_size):
             y_pred_prob = model.predict(X_batch)
             y_pred = (y_pred_prob > 0.5).astype(int)
-            m_y_pred = np.argmax(y_pred_prob, axis=1)  # For multi-class classification
             true_labels.extend(y_batch)
             predictions.extend(y_pred)
-            m_predictions.extend(m_y_pred)
-            if count >= 1000:
-                break
             count += 1
 
         print("TL:",true_labels)
@@ -87,21 +83,17 @@ class Base_Model:
         true_labels = np.array(true_labels)
         predictions = np.array(predictions)
 
-        #conf_matrix = confusion_matrix(true_labels, m_predictions)
-        #precision = precision_score(true_labels, predictions, average='binary')  # For binary classification
-        #recall = recall_score(true_labels, predictions, average='binary')
         accuracy = accuracy_score(true_labels, predictions)
         # For multi-class classification:
-        m_precision = precision_score(true_labels, predictions, average='macro')
-        m_recall = recall_score(true_labels, predictions, average='macro')
-
-        #print('Confusion Matrix:\n', conf_matrix)
-        #print('Precision:', precision)
-        #print('Recall:', recall)
+        precision = precision_score(true_labels, predictions, average='macro')
+        recall = recall_score(true_labels, predictions, average='macro')
+        
         print("Accuracy:", accuracy)
-        print("Multi:")
-        print('Precision:', m_precision)
-        print('Recall:', m_recall)
+        print('Precision:', precision)
+        print('Recall:', recall)
+        conf_matrix = confusion_matrix(true_labels, predictions)
+        print('Confusion Matrix:\n', conf_matrix)
+
 
 class Sequential_Model(Base_Model):
     def __init__(self):
@@ -178,7 +170,7 @@ class VGG16_Model(Base_Model):
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
         predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+        self.name = "VGG_16"
 
         # Create the complete model
         self.model = Model(inputs=base_model.input, outputs=predictions)
-        self.name = "VGG16"
