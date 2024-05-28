@@ -40,15 +40,16 @@ def data_generator(folder_path, batch_size):
         annotation_path = params['testing_path']['annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
-
-    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
-        logging.info(f"\n  Extracting frames from {video} and {file}")
-        frames_path = os.path.join(video_path, video)
-        labels_path = os.path.join(annotation_path, file)
-        for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
-            #logging.info(f"{i}/{len(frames)}")
-            if len(batch_frames) == len(batch_labels):
-                yield (np.array(batch_frames), np.array(batch_labels))
+    
+    while True:
+        for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
+            logging.info(f"\n  Extracting frames from {video} and {file}")
+            frames_path = os.path.join(video_path, video)
+            labels_path = os.path.join(annotation_path, file)
+            for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
+                #logging.info(f"{i}/{len(frames)}")
+                if len(batch_frames) == len(batch_labels):
+                    yield (np.array(batch_frames), np.array(batch_labels))
 
 def label_generator(path, batch_size):
     """

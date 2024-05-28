@@ -1,14 +1,21 @@
 import matplotlib.pyplot as plt
 import yaml
-import pickle
-with open("params/model_params.yaml", "r") as f:
+import pandas as pd
+import os
+import re
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def show_results(name=None, path=None):
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
+    params = yaml.load(f, Loader=yaml.SafeLoader)
+
+def show_results(name=None, path=None, history=None):
+    #TODO Fix this method
     if not (path):
         path = f"results\{name}_train_history"
-    with open(path, 'rb') as file_pi:
-        history = pickle.load(file_pi)    
+
+    #with open(path, 'rb') as file_pi:
+        #history = pickle.load(file_pi)    
     print(history)
     acc = history['accuracy']
     val_acc = history['val_accuracy']
@@ -36,10 +43,27 @@ def show_results(name=None, path=None):
     plt.savefig(f"results\{name}_history_graph.png")
     plt.show()
 
-def save_history(history,  name):
-    path = f"results\{name}_train_history"
-    with open(path, 'wb') as file_pi:
-        pickle.dump(history.history, file_pi)
+def save_history(history, name):
+    """
+    Saves the history of a model under results folder.
+    Params from params.yaml
+
+    Input:
+    history - history object for model
+    name - name of model
+    """
+    pattern = r'\((\d+)\)'
+    history_df = pd.DataFrame(history.history)
+    history_num = 0
+    history_name = f"{name}({history_num})_train-history"
+    for file in os.listdir(params['results_path']):
+        if file == history_name:
+            num = int(re.findall(pattern(file))[0])
+            if num > history_num:
+                history_num = num + 1
+    
+    history_name = f"{name}({history_num})_train-history"
+    history_df.to_csv(os.path.join(params['results_path'], history_name), index=False)
 
 
     
