@@ -29,9 +29,11 @@ def data_generator(folder_path, batch_size):
     Yield:
     (frames, annotations) length of batch_size
     """
+    iterations = 1
     if folder_path == 'training':
         video_path = params['training_path']['data']
         annotation_path = params['training_path']['annotations']
+        iterations = model_params['epochs']
     elif folder_path == 'validation':
         video_path = params['validation_path']['data']
         annotation_path = params['validation_path']['annotations']
@@ -41,7 +43,7 @@ def data_generator(folder_path, batch_size):
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     
-    for _ in range(model_params['epochs']):
+    for _ in range(iterations):
         for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
             logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)

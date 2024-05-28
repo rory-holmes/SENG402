@@ -51,7 +51,7 @@ class Base_Model:
         training_data = dataset_func('training', self.batch_size)
         logging.info("Extracting validation data")
         validation_data = dataset_func('validation', self.batch_size)
-        logging.info("Training model")
+        logging.info(f"Training model: {self.name}")
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
