@@ -18,20 +18,21 @@ def forward_pass(model):
     history, name = model.train(vp.data_generator)
     gh.save_history(history, name)
     fh.return_data()
+    logging.info(f"Testing {str(model.name)}")
+    model.test(vp.data_generator)
     #gh.show_results(name)
 
 def main():
-    logging.getLogger().setLevel(logging.INFO)
-    models = [VGG16_Model]
+    models = [VGG16_Model, ResNet50_Model, InceptionResNetV2_Model]
     for m in models:
         tf.keras.backend.clear_session()
         forward_pass(m())
-        logging.info(f"Testing")
-        m.test(vp.data_generator)
+
 
 def testing():
     Base_Model().test(vp.data_generator, made_model="VGG_16.keras")
 
 if __name__ == "__main__":
-    #main()
-    testing()
+    logging.getLogger().setLevel(logging.INFO)
+    main()
+    #testing()

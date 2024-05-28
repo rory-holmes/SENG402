@@ -52,6 +52,7 @@ def save_history(history, name):
     history - history object for model
     name - name of model
     """
+    print(history)
     pattern = r'\((\d+)\)'
     history_df = pd.DataFrame(history.history)
     history_num = 0
