@@ -12,7 +12,7 @@ from statistics import mean
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score
 
 
-with open("params\model_params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 class Base_Model:
@@ -66,20 +66,16 @@ class Base_Model:
             model = self.model
         else:
             model = load_model(made_model)
+
         true_labels = []
         predictions = []
-        m_predictions = []
-        count = 0 #TODO Remove 
         # Loop through testing data
         for X_batch, y_batch in dataset_func("testing", self.batch_size):
             y_pred_prob = model.predict(X_batch)
-            y_pred = (y_pred_prob > 0.5).astype(int)
+            y_pred = np.where(y_pred_prob > 0.5, 1, 0)
             true_labels.extend(y_batch)
             predictions.extend(y_pred)
-            count += 1
 
-        print("TL:",true_labels)
-        print("Pr:",predictions)
         true_labels = np.array(true_labels)
         predictions = np.array(predictions)
 

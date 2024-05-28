@@ -4,10 +4,10 @@ import tensorflow as tf
 import os
 import logging
 import numpy as np
-with open("params\params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params\model_params.yaml", "r") as f:
+with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
@@ -16,45 +16,19 @@ colour_chanel = params['settings']["colour_chanel"]
 frame_rate = params['settings']["frame_rate"]
 batch_size = model_params['batch_size']
 
-def extract_data(folder_path):
+def data_generator(folder_path, batch_size):
     """
     Extracts all frames and labels within paths provided and converts into tensors, 
-    yields dataset object for training or validation.
+    yields batches of frame, label pairs for training or validation.
     Params from params.yaml
 
     Input:
-    folder_path - Either 'training' or 'validation'
+    folder_path - Either 'training', 'validation', or 'test'
+    batch_size - size of batches yielded
 
     Yield:
-    dataset - TensorFlow dataset from tensor slices of frames and annotations for each video
+    (frames, annotations) length of batch_size
     """
-    if folder_path == 'training':
-        video_path = params['training_path']['data']
-        annotation_path = params['training_path']['annotations']
-    elif folder_path == 'validation':
-        video_path = params['validation_path']['data']
-        annotation_path = params['validation_path']['annotations']
-    else:
-        raise ValueError("Incorrect value for 'folder_path' must be 'training' or 'validation'")
-    all_frames = []
-    all_annotations = []
-    count = 0
-    for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))).repeat(): #TODO Get this to work
-        logging.info(f"  Extracting frames from {video} and {file}")
-        frames = get_frames(os.path.join(video_path, video))
-        annotations = get_labels(os.path.join(annotation_path, file))
-        if len(frames) != len(annotations):
-            frames = frames[:len(annotations)]
-        all_frames.extend(frames)
-        all_annotations.extend(annotations)
-        count += 1
-        if count >= 1:
-            break
-    dataset = tf.data.Dataset.from_tensor_slices((all_frames, all_annotations))
-    dataset = dataset.batch(batch_size)
-    return dataset
-
-def data_generator(folder_path, batch_size):
     if folder_path == 'training':
         video_path = params['training_path']['data']
         annotation_path = params['training_path']['annotations']
@@ -69,16 +43,14 @@ def data_generator(folder_path, batch_size):
 
     for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
         logging.info(f"\n  Extracting frames from {video} and {file}")
-        frames = get_frames(os.path.join(video_path, video))
-        annotations = get_labels(os.path.join(annotation_path, file))
-        for i in range(0, len(frames), batch_size):
-            batch_frames = np.array(frames[i:i+batch_size])
-            batch_annotations = np.array(annotations[i:i+batch_size])
+        frames_path = os.path.join(video_path, video)
+        labels_path = os.path.join(annotation_path, file)
+        for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
             #logging.info(f"{i}/{len(frames)}")
-            if batch_frames.shape[0] == batch_annotations.shape[0]:
-                yield (batch_frames, batch_annotations)
+            if len(batch_frames) == len(batch_labels):
+                yield (np.array(batch_frames), np.array(batch_labels))
 
-def get_labels(path):
+def label_generator(path, batch_size):
     """
     Extracts all labels for a video. 
     Needs to be updated based on format of label file.
@@ -101,9 +73,14 @@ def get_labels(path):
         label = [int(l) for l in label[1:]]
         #break #TODO Remove this line
         labels.append(label)
-    return labels
+        if len(labels) == batch_size:
+            yield labels
+            labels = []
 
-def get_frames(video_path):
+    if labels:
+        yield labels
+
+def frame_generator(video_path, batch_size):
     """
     Gets individual frames from video_path specified by 'frame_rate'.
     Params from params.yaml
@@ -124,12 +101,15 @@ def get_frames(video_path):
             if count % frame_rate == 0: #If correct frame_rate
                 frame = resize_frame(frame)
                 frames.append(frame)
-                #break #TODO remove this
+            if len(frames) == batch_size:
+                yield frames
+                frames = []
         else:
             break
         count += 1
     cap.release()
-    return frames
+    if frames:
+        yield frames
 
 def resize_frame(frame):
     """

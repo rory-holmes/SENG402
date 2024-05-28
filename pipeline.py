@@ -18,7 +18,7 @@ def forward_pass(model):
     history, name = model.train(vp.data_generator)
     gh.save_history(history, name)
     fh.return_data()
-    gh.show_results(name)
+    #gh.show_results(name)
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
