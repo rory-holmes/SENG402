@@ -41,7 +41,7 @@ def data_generator(folder_path, batch_size):
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     
-    while True:
+    for _ in range(model_params['epochs']):
         for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
             logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
