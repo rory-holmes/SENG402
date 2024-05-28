@@ -29,11 +29,9 @@ def data_generator(folder_path, batch_size):
     Yield:
     (frames, annotations) length of batch_size
     """
-    iterations = 1
     if folder_path == 'training':
         video_path = params['training_path']['data']
         annotation_path = params['training_path']['annotations']
-        iterations = model_params['epochs']
     elif folder_path == 'validation':
         video_path = params['validation_path']['data']
         annotation_path = params['validation_path']['annotations']
@@ -43,7 +41,7 @@ def data_generator(folder_path, batch_size):
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     
-    for _ in range(iterations):
+    while True:
         for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
             logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
@@ -52,6 +50,30 @@ def data_generator(folder_path, batch_size):
                 #logging.info(f"{i}/{len(frames)}")
                 if len(batch_frames) == len(batch_labels):
                     yield (np.array(batch_frames), np.array(batch_labels))
+            
+
+def get_training_validation_steps():
+    """
+    Returns training steps, validation steps
+    """
+    def get_steps(folder_path):
+        """
+        Gets the length of all files found within folder_path and divides by batch_size.
+        Params from params.yaml
+
+        Inputs:
+        folder_path - the folder used to calculate length of files 
+
+        Returns:
+        steps necessary for training or validation        
+        """
+        steps = 0
+        for root, _, files in os.walk(folder_path):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                steps += os.path.getsize(file_path)
+        return steps/model_params['batch_size']
+    return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
 
 def label_generator(path, batch_size):
     """

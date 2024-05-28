@@ -4,6 +4,9 @@ import PIL
 import tensorflow as tf
 from keras import layers, applications, metrics
 from keras.optimizers import Adam
+import sys
+sys.path.append('utils')
+import utils.video_process as vp
 from keras.models import Sequential, Model, load_model
 import yaml
 import logging
@@ -42,25 +45,28 @@ class Base_Model:
             ]
         )
 
-    def train(self, dataset_func):
+    def train(self):
         """
         Trains model on dataset
         """
         self.compile()
+        steps_per_epoch, validation_steps = vp.get_training_validation_steps()
         logging.info("Extracting training data")
-        training_data = dataset_func('training', self.batch_size)
+        training_data = vp.data_generator('training', self.batch_size)
         logging.info("Extracting validation data")
-        validation_data = dataset_func('validation', self.batch_size)
+        validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
-            epochs=self.epochs
+            epochs=self.epochs,
+            steps_per_epoch=steps_per_epoch,
+            validation_steps=validation_steps
         )
         self.model.save(f"{self.name}.keras")
         return history, self.name
 
-    def test(self, dataset_func, made_model=None):
+    def test(self, made_model=None):
         # If using a premade model, not integrated into pipeline
         if made_model == None:
             model = self.model
@@ -70,7 +76,7 @@ class Base_Model:
         true_labels = []
         predictions = []
         # Loop through testing data
-        for X_batch, y_batch in dataset_func("testing", self.batch_size):
+        for X_batch, y_batch in vp.data_generator("testing", self.batch_size):
             y_pred_prob = model.predict(X_batch)
             y_pred = np.where(y_pred_prob > 0.5, 1, 0)
             true_labels.extend(y_batch)

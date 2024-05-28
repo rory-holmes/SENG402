@@ -15,11 +15,11 @@ with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml"
 
 def forward_pass(model):
     fh.split_data()
-    history, name = model.train(vp.data_generator)
+    history, name = model.train()
     gh.save_history(history, name)
     fh.return_data()
     logging.info(f"Testing {str(model.name)}")
-    model.test(vp.data_generator)
+    model.test()
     #gh.show_results(name)
 
 def main():
@@ -30,7 +30,7 @@ def main():
 
 
 def testing():
-    Base_Model().test(vp.data_generator, made_model="VGG_16.keras")
+    Base_Model().test(made_model="VGG_16.keras")
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
