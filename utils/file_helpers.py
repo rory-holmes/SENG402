@@ -47,10 +47,12 @@ def split_data():
     for video, annotation in zipped_data[:training_amount]:
         os.rename(os.path.join(params['origin_path']['data'], video), os.path.join(params['training_path']['data'], video))
         os.rename(os.path.join(params['origin_path']['annotations'], annotation), os.path.join(params['training_path']['annotations'], annotation))
+        
     #Validation data
     for video, annotation in zipped_data[training_amount:]:
         os.rename(os.path.join(params['origin_path']['data'], video), os.path.join(params['validation_path']['data'], video))
         os.rename(os.path.join(params['origin_path']['annotations'], annotation), os.path.join(params['validation_path']['annotations'], annotation))
+        
     logging.info("  Data has been split")
 
 def return_data():
@@ -83,4 +85,3 @@ def setup():
                 logging.info(f" Folder already exists: {folder_path}")
     logging.info("Setup completed")
 
-return_data()

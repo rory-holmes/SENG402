@@ -3,6 +3,7 @@ import yaml
 import tensorflow as tf
 import os
 import logging
+import glob
 import numpy as np
 with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -40,10 +41,10 @@ def data_generator(folder_path, batch_size):
         annotation_path = params['testing_path']['annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
-    
+    logging.info(f"\n  Data generator running for {folder_path}")
     while True:
         for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
-            logging.info(f"\n  Extracting frames from {video} and {file}")
+            #logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
             labels_path = os.path.join(annotation_path, file)
             for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
@@ -68,11 +69,12 @@ def get_training_validation_steps():
         steps necessary for training or validation        
         """
         steps = 0
-        for root, _, files in os.walk(folder_path):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                steps += os.path.getsize(file_path)
+        for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+                steps += len(lines)
         return steps/model_params['batch_size']
+    
     return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
 
 def label_generator(path, batch_size):
