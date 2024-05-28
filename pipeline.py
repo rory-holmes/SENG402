@@ -17,7 +17,6 @@ def forward_pass(model):
     fh.split_data()
     history, name = model.train()
     gh.save_history(history, name)
-    fh.return_data()
     logging.info(f"Testing {str(model.name)}")
     model.test()
     #gh.show_results(name)

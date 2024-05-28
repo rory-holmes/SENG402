@@ -29,6 +29,7 @@ def split_data():
     Splits data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
     Params from params.yaml
     """
+    return_data() 
     split = model_params.get("training_split")
     origin_data = sorted(os.listdir(params['origin_path']['data']))
     origin_annotations = sorted(os.listdir(params['origin_path']['annotations']))
