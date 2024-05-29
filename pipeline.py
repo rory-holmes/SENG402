@@ -18,7 +18,7 @@ def forward_pass(model):
     history, name = model.train()
     gh.save_history(history, name)
     logging.info(f"Testing {str(model.name)}")
-    model.test()
+    #model.test()
     #gh.show_results(name)
 
 def main():

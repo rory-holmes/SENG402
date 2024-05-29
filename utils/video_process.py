@@ -5,6 +5,7 @@ import os
 import logging
 import glob
 import numpy as np
+
 with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 

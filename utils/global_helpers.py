@@ -2,7 +2,13 @@ import matplotlib.pyplot as plt
 import yaml
 import pandas as pd
 import os
+import sys
+import video_process as vp
 import re
+import numpy as np
+import cv2
+from keras.models import load_model
+
 with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
@@ -10,6 +16,12 @@ with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml"
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def show_results(csv_path):
+    """
+    Plots train history [accuracy, F1Score, precision, recall] from a csv file given
+    
+    Inputs:
+    csv_path - csv file containg results to be plotted
+    """
     # Load the CSV file
     df = pd.read_csv(csv_path)
     
@@ -55,7 +67,7 @@ def save_history(history, name):
     Saves the history of a model under results folder.
     Params from params.yaml
 
-    Input:
+    Inputs:
     history - history object for model
     name - name of model
     """
@@ -73,6 +85,30 @@ def save_history(history, name):
     history_name = f"{name}({history_num})_train-history"
     history_df.to_csv(os.path.join(params['results_path'], history_name), index=False)
 
+def demo(model_path):
+    """
+    Retrieves frames, labels from generator, evaluates with model, displays image and evaluations.
 
+    Inputs:
+    model_path - Path to model to be demoed
+    """
+    model = load_model(model_path)
+    org = (50, 50)  # Bottom-left corner of the text string in the image
+    font = cv2.FONT_HERSHEY_SIMPLEX  # Font type
+    font_scale = 1  # Font scale factor
+    color = (255, 0, 0)  # Color in BGR (Blue, Green, Red)
+    thickness = 2  # Thickness of the lines used to draw a text
+    for X_batch, y_batch in vp.data_generator("testing", 1):
+        y_pred_prob = model.predict(X_batch)
+        y_pred = np.where(y_pred_prob > 0.5, 1, 0)
+        
+        cv2.putText(X_batch, f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.putText(X_batch, f"Actual: {y_batch}", org, font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.imshow('Frame', X_batch)        
+
+            # Break the loop on 'q' key press
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
     
 #show_results(path="E:/results_ResNet50_train_history")
+demo("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/ResNet50(0).keras")

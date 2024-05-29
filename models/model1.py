@@ -93,8 +93,6 @@ class Base_Model:
         print("Accuracy:", accuracy)
         print('Precision:', precision)
         print('Recall:', recall)
-        conf_matrix = confusion_matrix(true_labels, predictions)
-        print('Confusion Matrix:\n', conf_matrix)
 
 
 class Sequential_Model(Base_Model):
