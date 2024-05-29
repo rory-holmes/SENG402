@@ -9,38 +9,45 @@ with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params
 with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def show_results(name=None, path=None, history=None):
-    #TODO Fix this method
-    if not (path):
-        path = f"results\{name}_train_history"
+def show_results(csv_path):
+    # Load the CSV file
+    df = pd.read_csv(csv_path)
+    
+    # Calculate F1 Score for validation data
+    df['val_f1_score'] = 2 * (df['val_precision'] * df['val_recall']) / (df['val_precision'] + df['val_recall'])
+    
+    # Plot the data
+    epochs = range(1, len(df) + 1)
 
-    #with open(path, 'rb') as file_pi:
-        #history = pickle.load(file_pi)    
-    print(history)
-    acc = history['accuracy']
-    val_acc = history['val_accuracy']
-    precision= history['precision']
-    recall=history['recall']
-    loss = history['loss']
-    val_loss = history['val_loss']
-
-    epochs_range = range(model_params['epochs'])
-
-    plt.figure(figsize=(8, 8))
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs_range, acc, label='Training Accuracy')
-    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-    plt.plot(epochs_range, precision, label='Precision')
-    plt.plot(epochs_range, recall, label="Recall")
-    plt.legend(loc='lower right')
-    plt.title('Training and Validation Accuracy')
-
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs_range, loss, label='Training Loss')
-    plt.plot(epochs_range, val_loss, label='Validation Loss')
-    plt.legend(loc='upper right')
-    plt.title('Training and Validation Loss')
-    plt.savefig(f"results\{name}_history_graph.png")
+    plt.figure(figsize=(14, 10))
+    
+    # Loss plot
+    plt.subplot(3, 1, 1)
+    plt.plot(epochs, df['loss'], 'b', label='Training loss')
+    plt.plot(epochs, df['val_loss'], 'r', label='Validation loss')
+    plt.title('Training and validation loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    
+    # Accuracy plot
+    plt.subplot(3, 1, 2)
+    plt.plot(epochs, df['accuracy'], 'b', label='Training accuracy')
+    plt.plot(epochs, df['val_accuracy'], 'r', label='Validation accuracy')
+    plt.title('Training and validation accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    
+    # F1 Score plot
+    plt.subplot(3, 1, 3)
+    plt.plot(epochs, df['val_f1_score'], 'g', label='Validation F1 Score')
+    plt.title('Validation F1 Score')
+    plt.xlabel('Epochs')
+    plt.ylabel('F1 Score')
+    plt.legend()
+    
+    plt.tight_layout()
     plt.show()
 
 def save_history(history, name):
