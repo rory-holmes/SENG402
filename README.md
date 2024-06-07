@@ -17,5 +17,6 @@ Usage:
 
  1. Run the setup method found within file_helpers to initialse folders for training.
  2. Setup pathways found within params.yaml
- 3. Run pipeline.py
- 4. Test output of model by calling the demo() method within global_helpers.py with the path to the trained model.
+ 3. Split Some data into testing folder manually for testing.
+ 4. Run pipeline.py
+ 5. Evaluate data by the global_helpers.py file

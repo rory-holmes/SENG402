@@ -54,28 +54,28 @@ def data_generator(folder_path, batch_size):
         if folder_path == "testing":
             break
 
+def get_steps(folder_path):
+    """
+    Gets the length of all files found within folder_path and divides by batch_size.
+    Params from params.yaml
+
+    Inputs:
+    folder_path - Path to the folder used to calculate length of files 
+
+    Returns:
+    Steps necessary based on folder_path size        
+    """
+    steps = 0
+    for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            steps += len(lines)
+    return steps/model_params['batch_size']
+
 def get_training_validation_steps():
     """
     Returns training steps, validation steps
     """
-    def get_steps(folder_path):
-        """
-        Gets the length of all files found within folder_path and divides by batch_size.
-        Params from params.yaml
-
-        Inputs:
-        folder_path - Path to the folder used to calculate length of files 
-
-        Returns:
-        Steps necessary based on folder_path size        
-        """
-        steps = 0
-        for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
-                steps += len(lines)
-        return steps/model_params['batch_size']
-    
     return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
 
 def label_generator(path, batch_size):
