@@ -72,10 +72,10 @@ def return_data():
 
 def setup():
     """
-    Setups initial directories
+    Setups initial (data, training, validation, testing, results) directories
     """
     logging.info("Checking if directories are setup")
-    paths = [params['origin_path'], params['training_path'], params['validation_path'], params['testing_path']]
+    paths = [params['origin_path'], params['training_path'], params['validation_path'], params['testing_path'], params['results_path']]
     for path in paths:
         for folder_path in path.values():
             if not os.path.exists(folder_path):

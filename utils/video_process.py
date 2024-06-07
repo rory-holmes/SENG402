@@ -1,6 +1,5 @@
 import cv2
 import yaml
-import tensorflow as tf
 import os
 import logging
 import glob
@@ -65,10 +64,10 @@ def get_training_validation_steps():
         Params from params.yaml
 
         Inputs:
-        folder_path - the folder used to calculate length of files 
+        folder_path - Path to the folder used to calculate length of files 
 
         Returns:
-        steps necessary for training or validation        
+        Steps necessary based on folder_path size        
         """
         steps = 0
         for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
@@ -81,14 +80,17 @@ def get_training_validation_steps():
 
 def label_generator(path, batch_size):
     """
-    Extracts all labels for a video. 
-    Needs to be updated based on format of label file.
+    Extracts all labels for a video, yields by batch_size. 
     
     Inputs:
     path - A path to the text file containing labels
+    batch_size - quantity of labels to return per yield
 
-    Returns:
+    Yields:
     labels - A list of all class labels within a video
+        
+    Note:
+    Would need to be updated based on format of label file.
     """
     file = open(path, "r")
     labels = []
@@ -111,14 +113,15 @@ def label_generator(path, batch_size):
 
 def frame_generator(video_path, batch_size):
     """
-    Gets individual frames from video_path specified by 'frame_rate'.
+    Gets individual frames of length 'batch_size' from video_path specified by 'frame_rate'.
     Params from params.yaml
 
     Inputs:
     video_path - path to video for frame extraction
+    batch_size - quantity of frames to return
 
-    Returns:
-    List of raw frames from video_path
+    Yields:
+    List of raw frames from video_path of size batch_size
     """
     count = 0
     cap = cv2.VideoCapture(video_path)
@@ -143,7 +146,7 @@ def frame_generator(video_path, batch_size):
 def resize_frame(frame):
     """
     Resizes all frames into 'model_width' and 'model_height' sizes
-    Params from params.yaml
+    Params from model_params.yaml
 
     Input:
     frames - A list of frames

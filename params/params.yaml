@@ -10,6 +10,7 @@ validation_path:
 testing_path:
   data: "E:/SENG402/testing/videos"
   annotations: "E:/SENG402/testing/annotations"
+results_path: "/results"
 file_formats:
   data_type: ".mp4"
   annotation_type: ".txt"

@@ -1,22 +1,24 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from keras import layers, applications, metrics
 from keras.optimizers import Adam
 import sys
 sys.path.append('utils')
 import utils.video_process as vp
-from keras.models import Sequential, Model, load_model
+import utils.global_helpers as gh
+from keras.models import Model, load_model
 import yaml
 import logging
-from statistics import mean 
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score
-
+from sklearn.metrics import precision_score, recall_score, accuracy_score
 
 with open("/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-class Base_Model:
-    def __init__(self):
+class CNN:
+    """
+    Class to be passed pre-trained models, initialises values based on the model_params file.
+    Contains methods for compiling, training, and testing.
+    """
+    def __init__(self, base_model):
         self.training_data = []
         self.validation_data = []
         self.model = None
@@ -29,6 +31,14 @@ class Base_Model:
         self.learning_rate = model_params['learning_rate']
         self.name = "NULL"
 
+        x = base_model.output
+        x = layers.GlobalAveragePooling2D()(x)
+        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
+        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+
+        # Create the complete model
+        self.model = Model(inputs=base_model.input, outputs=predictions)
+        
     def compile(self):
         """
         Compiles model.
@@ -86,32 +96,11 @@ class Base_Model:
         # For multi-class classification:
         precision = precision_score(true_labels, predictions, average='macro')
         recall = recall_score(true_labels, predictions, average='macro')
-        
-        print("Accuracy:", accuracy)
-        print('Precision:', precision)
-        print('Recall:', recall)
+        gh.save_history(np.array([accuracy, precision, recall]).T, labels=['Accruacy', 'Precision', 'Recall'])
 
-
-class Sequential_Model(Base_Model):
-    def __init__(self):
-        super().__init__()
-        self.model = Sequential([
-            layers.Rescaling(1./255, input_shape=(self.img_height, self.img_width, self.channels)),
-            layers.Conv2D(16, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(32, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(64, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Flatten(),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(self.num_classes)
-        ])
-        self.name = "Sequential"
-
-class ResNet50_Model(Base_Model):
+class ResNet50_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        super().__init__()
+        self.name = "ResNet50"
         base_model = applications.ResNet50(
             include_top=False,
             weights=pretrained_weights,
@@ -121,18 +110,11 @@ class ResNet50_Model(Base_Model):
             classes=7,
             classifier_activation="softmax",
         )
-        x = base_model.output
-        x = layers.GlobalAveragePooling2D()(x)
-        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
-        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+        super().__init__(base_model)
 
-        # Create the complete model
-        self.model = Model(inputs=base_model.input, outputs=predictions)
-        self.name = "ResNet50"
-
-class InceptionResNetV2_Model(Base_Model):
+class InceptionResNetV2_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        super().__init__()
+        self.name = "InceptionResNetV2"
         base_model = applications.InceptionResNetV2(
             include_top=False,
             weights=pretrained_weights,
@@ -142,18 +124,11 @@ class InceptionResNetV2_Model(Base_Model):
             classes=7,
             classifier_activation="softmax",
         )
-        x = base_model.output
-        x = layers.GlobalAveragePooling2D()(x)
-        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
-        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+        super().__init__(base_model)
 
-        # Create the complete model
-        self.model = Model(inputs=base_model.input, outputs=predictions)
-        self.name = "InceptionResNetV2"
-
-class VGG16_Model(Base_Model):
+class VGG16_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        super().__init__()
+        self.name = "VGG_16"
         base_model = applications.VGG16(
             include_top=False,
             weights=pretrained_weights,
@@ -163,11 +138,4 @@ class VGG16_Model(Base_Model):
             classes=7,
             classifier_activation="softmax",
         )
-        x = base_model.output
-        x = layers.GlobalAveragePooling2D()(x)
-        x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
-        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
-        self.name = "VGG_16"
-
-        # Create the complete model
-        self.model = Model(inputs=base_model.input, outputs=predictions)
+        super().__init__(base_model)

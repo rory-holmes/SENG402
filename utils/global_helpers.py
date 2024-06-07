@@ -12,7 +12,7 @@ from matplotlib.ticker import MaxNLocator
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def show_results(csv_path1, csv_path2, csv_path3):
+def graph_results(csv_path1, csv_path2, csv_path3):
     """
     Plots the validation accuracy from three csv files on a single graph with different colors.
     
@@ -43,8 +43,8 @@ def show_results(csv_path1, csv_path2, csv_path3):
     
     plt.tight_layout()
     plt.show()
-    
-def save_history(history, name):
+
+def save_history(history, name, labels=None):
     """
     Saves the history of a model under results folder.
     Params from params.yaml
@@ -52,24 +52,32 @@ def save_history(history, name):
     Inputs:
     history - history object for model
     name - name of model
+    labels - labels of test metrics if test data
     """
-    print(history)
     pattern = r'\((\d+)\)'
-    history_df = pd.DataFrame(history.history)
+    # If training history object has been passed
+    if not(labels):
+        history_df = pd.DataFrame(history.history)
+        h_type = 'train'
+    else:
+        history_df = pd.DataFrame(history, columns=labels)
+        h_type = 'test'
+
     history_num = 0
-    history_name = f"{name}({history_num})_train-history"
+    history_name = f"{name}({history_num})_{h_type}-history"
     for file in os.listdir(params['results_path']):
         if file == history_name:
             num = int(re.findall(pattern(file))[0])
             if num > history_num:
                 history_num = num + 1
     
-    history_name = f"{name}({history_num})_train-history"
+    history_name = f"{name}({history_num})_{h_type}-history"
     history_df.to_csv(os.path.join(params['results_path'], history_name), index=False)
 
 def demo(model_path):
     """
     Retrieves frames, labels from generator, evaluates with model, displays image and evaluations.
+    Frames iterated by 'n' key. Frame saved by 'enter' key. Quit by 'q' key.
 
     Inputs:
     model_path - Path to model to be demoed
@@ -96,10 +104,10 @@ def demo(model_path):
         cv2.imshow('Frame', X_batch_display)
         key = cv2.waitKey(1) & 0xFF
         
-        if key == ord('q'):  # 'q' key
+        if key == ord('q'): 
             break
         
-        if key == ord('n'):  # Right arrow key
+        if key == ord('n'):  
             try:
                 X_batch, y_batch = next(data_gen)
             except StopIteration:
@@ -119,5 +127,3 @@ def demo(model_path):
 
     cv2.destroyAllWindows()
     
-#show_results("E:/InceptionResNetV2(0)_train-history", "E:/ResNet50(0)_train-history", "E:/VGG_16(0)_train-history")
-#demo("ResNet50(1).keras")
