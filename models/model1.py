@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL
-import tensorflow as tf
 from keras import layers, applications, metrics
 from keras.optimizers import Adam
 import sys
@@ -10,12 +8,11 @@ import utils.video_process as vp
 from keras.models import Sequential, Model, load_model
 import yaml
 import logging
-import os
 from statistics import mean 
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score
 
 
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
+with open("/params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 class Base_Model:

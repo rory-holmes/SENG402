@@ -10,7 +10,7 @@ import tensorflow as tf
 import os
 import logging
 
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
+with open("/params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def forward_pass(model):
@@ -18,15 +18,12 @@ def forward_pass(model):
     history, name = model.train()
     gh.save_history(history, name)
     logging.info(f"Testing {str(model.name)}")
-    #model.test()
-    #gh.show_results(name)
 
 def main():
     models = [VGG16_Model, ResNet50_Model, InceptionResNetV2_Model]
     for m in models:
         tf.keras.backend.clear_session()
         forward_pass(m())
-
 
 def testing():
     Base_Model().test(made_model="VGG_16.keras")
