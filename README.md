@@ -3,8 +3,10 @@ Operative skill assesment for lacroscopic colorectal surgery
 
 ## Table of Contents
 [Description](#description)
+
 [Installation](#installation)
-[Installation](#Usage)
+
+[Usage](#Usage)
 
 ## Description
 This code focuses on assessing surgical skill within colorectal surgery. Although operative reviews have shown to be valuable in competency-based surgical training, manual reviews are too time-consuming to be a routine practice. Colorectal surgery has shown potential for skill assessment due to the correlation between Vascular Pedicle Dissection Time (VPDT) and manually assessed competency scores. This code focuses on the feature extraction of tool classification within cholocysectomy surgery to be used for phase detection in colorectal surgery.
@@ -15,15 +17,15 @@ This code focuses on assessing surgical skill within colorectal surgery. Althoug
     ```sh
     git clone https://github.com/rory-holmes/SENG402.git
     ```
- 2.  Naviagate to project directory:
+ 2. Naviagate to project directory:
     ```sh
     cd SENG402
     ```
- 3. Install project dependencies found with in dependencies.json
+ 4. Install project dependencies found with in dependencies.json
     ```sh
     npm install
     ```
- 4. Install the [cholec80 dataset](http://camma.u-strasbg.fr/datasets).
+ 5. Install the [cholec80 dataset](http://camma.u-strasbg.fr/datasets).
 
 ## Usage:
 
