@@ -3,6 +3,7 @@ import unittest
 import os
 import sys
 sys.path.append('utils')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import utils.video_process as vp
 import utils.file_helpers as fh
 import numpy as np
@@ -40,30 +41,30 @@ def tearDownTestSuite():
                 os.unlink(file_path)
         os.rmdir('test_suite')
 
-class TestValueError(unittest.TestCase):
+class TestStringMethods(unittest.TestCase):
 
-    def givenIncorrectPath_whenDataGenerator_thenValueError(self):
+    def test_givenIncorrectPath_whenDataGenerator_thenValueError(self):
         with self.assertRaises(ValueError):
             _, _ = vp.data_generator('Incorrect/Path', 0)
 
-    def givenCorrectPath_whenDataGenerator_thenBatchReturned(self):
+    def test_givenCorrectPath_whenDataGenerator_thenBatchReturned(self):
         fh.split_data()
         batch_size = 5
         for frames, labels in vp.data_generator('training', batch_size):
-            assert(len(frames) == len(labels))
-            assert(len(frames) == batch_size)
+            self.assertEqual(len(frames), len(labels))
+            self.assertEqual(len(frames), batch_size)
             break
         fh.return_data()
 
-    def givenFrame_whenResizeFrame_thenFrameResized(self):
+    def test_givenFrame_whenResizeFrame_thenFrameResized(self):
         frame = np.random.randint(0, 256, (300, 300, 3), dtype=np.uint8)
         resized_frame = vp.resize_frame(frame)
-        assert(resized_frame.shape == ((n_h, n_w, 3)))
+        self.assertEqual(resized_frame.shape, ((n_h, n_w, 3)))
 
-    def givenLabels_whenGetSteps_thenCorrectStepsReturned(self):
+    def test_givenLabels_whenGetSteps_thenCorrectStepsReturned(self):
         createFolderToTestSteps()
         steps = vp.get_steps('test_suite')
-        assert(steps == 30)
+        self.assertEqual(steps, 30/model_params['batch_size'])
         tearDownTestSuite()
 
 if __name__ == '__main__':
