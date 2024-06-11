@@ -3,6 +3,7 @@ from keras import layers, applications, metrics
 from keras.optimizers import Adam
 import sys
 sys.path.append('utils')
+sys.path.append('params')
 import utils.video_process as vp
 import utils.global_helpers as gh
 from keras.models import Model, load_model
@@ -10,9 +11,13 @@ import yaml
 import logging
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 
-with open("/params/model_params.yaml", "r") as f:
+with open("params\model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
+img_height = model_params["image_height"]
+img_width = model_params["image_width"]
+channels = model_params["channels"]
+    
 class CNN:
     """
     Class to be passed pre-trained models, initialises values based on the model_params file.
@@ -24,9 +29,7 @@ class CNN:
         self.model = None
         self.epochs = model_params['epochs']
         self.batch_size = model_params['batch_size']
-        self.img_height = model_params["image_height"]
-        self.img_width = model_params["image_width"]
-        self.channels = model_params["channels"]
+
         self.num_classes = model_params["num_classes"]
         self.learning_rate = model_params['learning_rate']
         self.name = "NULL"
@@ -105,7 +108,7 @@ class ResNet50_Model(CNN):
             include_top=False,
             weights=pretrained_weights,
             input_tensor=None,
-            input_shape=(self.img_height, self.img_width, self.channels),
+            input_shape=(img_height, img_width, channels),
             pooling=None,
             classes=7,
             classifier_activation="softmax",
@@ -119,7 +122,7 @@ class InceptionResNetV2_Model(CNN):
             include_top=False,
             weights=pretrained_weights,
             input_tensor=None,
-            input_shape=(self.img_height, self.img_width, self.channels),
+            input_shape=(img_height, img_width, channels),
             pooling=None,
             classes=7,
             classifier_activation="softmax",
@@ -133,7 +136,7 @@ class VGG16_Model(CNN):
             include_top=False,
             weights=pretrained_weights,
             input_tensor=None,
-            input_shape=(self.img_height, self.img_width, self.channels),
+            input_shape=(img_height, img_width, channels),
             pooling=None,
             classes=7,
             classifier_activation="softmax",
