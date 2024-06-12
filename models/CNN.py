@@ -29,15 +29,13 @@ class CNN:
         self.model = None
         self.epochs = model_params['epochs']
         self.batch_size = model_params['batch_size']
-
         self.num_classes = model_params["num_classes"]
         self.learning_rate = model_params['learning_rate']
-        self.name = "NULL"
 
         x = base_model.output
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Dense(1024, activation='relu')(x)  # Add a fully connected layer
-        predictions = layers.Dense(7, activation='softmax')(x)  # Add the final output layer for 7 classes
+        predictions = layers.Dense(self.num_classes, activation='softmax')(x)  # Add the final output layer for 7 classes
 
         # Create the complete model
         self.model = Model(inputs=base_model.input, outputs=predictions)
