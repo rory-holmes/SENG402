@@ -142,3 +142,15 @@ class VGG16_Model(CNN):
             classifier_activation="softmax",
         )
         super().__init__(base_model)
+
+def freeze_layers(network, n=300):
+    """
+    Freezes n amount of layers of the network given for training
+    
+    Inputs:
+    network - the CNN to freeze
+    n - the quantity of layers to freeze
+    """
+    # Call before compiling
+    for layer in network.layers[:n]:
+        layer.trainable = False
