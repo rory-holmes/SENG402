@@ -95,16 +95,16 @@ def demo(model_path):
     model = load_model(model_path)
     org = (50, 50)  # Bottom-left corner of the text string in the image
     font = cv2.FONT_HERSHEY_SIMPLEX  # Font type
-    font_scale = 1  # Font scale factor
+    font_scale = 0.4  # Font scale factor
     color = (255, 0, 0)  # Color in BGR (Blue, Green, Red)
     thickness = 2  # Thickness of the lines used to draw a text
     for X_batch, y_batch in vp.data_generator("testing", 1):
         y_pred_prob = model.predict(X_batch)
         y_pred = np.where(y_pred_prob > 0.5, 1, 0)
         
-        cv2.putText(X_batch, f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
-        cv2.putText(X_batch, f"Actual: {y_batch}", org, font, font_scale, color, thickness, cv2.LINE_AA)
-        cv2.imshow('Frame', X_batch)        
+        cv2.putText(X_batch[0], f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.putText(X_batch[0], f"Actual: {y_batch}", (50, 100), font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.imshow('Frame', X_batch[0])        
 
             # Break the loop on 'q' key press
         if cv2.waitKey(1) & 0xFF == ord('q'):

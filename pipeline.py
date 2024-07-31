@@ -22,14 +22,14 @@ def forward_pass(model):
     #gh.show_results(name)
 
 def main():
-    models = [VGG16_Model, ResNet50_Model, InceptionResNetV2_Model]
+    models = [VGG16_Model, InceptionResNetV2_Model]
     for m in models:
         tf.keras.backend.clear_session()
         forward_pass(m())
 
 
 def testing():
-    Base_Model().test(made_model="VGG_16.keras")
+    Base_Model().test(made_model="/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/ResNet50(0).keras")
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
