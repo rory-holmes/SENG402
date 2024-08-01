@@ -2,67 +2,49 @@ import matplotlib.pyplot as plt
 import yaml
 import pandas as pd
 import os
-import sys
 import video_process as vp
 import re
 import numpy as np
 import cv2
 from keras.models import load_model
+from matplotlib.ticker import MaxNLocator
 
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/model_params.yaml", "r") as f:
-    model_params = yaml.load(f, Loader=yaml.SafeLoader)
-
-with open("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/params/params.yaml", "r") as f:
+with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def show_results(csv_path):
+def graph_results(csv_path1, csv_path2, csv_path3):
     """
-    Plots train history [accuracy, F1Score, precision, recall] from a csv file given
+    Plots the validation accuracy from three csv files on a single graph with different colors.
     
     Inputs:
-    csv_path - csv file containg results to be plotted
+    csv_path1, csv_path2, csv_path3 - CSV files containing results to be plotted
     """
-    # Load the CSV file
-    df = pd.read_csv(csv_path)
-    
-    # Calculate F1 Score for validation data
-    df['val_f1_score'] = 2 * (df['val_precision'] * df['val_recall']) / (df['val_precision'] + df['val_recall'])
+    # Load the CSV files
+    df1 = pd.read_csv(csv_path1)
+    df2 = pd.read_csv(csv_path2)
+    df3 = pd.read_csv(csv_path3)
     
     # Plot the data
-    epochs = range(1, len(df) + 1)
+    epochs1 = range(1, len(df1) + 1)
+    epochs2 = range(1, len(df2) + 1)
+    epochs3 = range(1, len(df3) + 1)
 
-    plt.figure(figsize=(14, 10))
+    plt.figure(figsize=(14, 8))
     
-    # Loss plot
-    plt.subplot(3, 1, 1)
-    plt.plot(epochs, df['loss'], 'b', label='Training loss')
-    plt.plot(epochs, df['val_loss'], 'r', label='Validation loss')
-    plt.title('Training and validation loss')
+    # Validation Accuracy plot
+    plt.plot(epochs1, df1['val_loss'], 'b', label='InceptionResnetV2')
+    plt.plot(epochs2, df2['val_loss'], 'r', label='ResNet50')
+    plt.plot(epochs3, df3['val_loss'], 'g', label='VGG16')
+    plt.title('Validation Loss over 3 epochs')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    
-    # Accuracy plot
-    plt.subplot(3, 1, 2)
-    plt.plot(epochs, df['accuracy'], 'b', label='Training accuracy')
-    plt.plot(epochs, df['val_accuracy'], 'r', label='Validation accuracy')
-    plt.title('Training and validation accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-    
-    # F1 Score plot
-    plt.subplot(3, 1, 3)
-    plt.plot(epochs, df['val_f1_score'], 'g', label='Validation F1 Score')
-    plt.title('Validation F1 Score')
-    plt.xlabel('Epochs')
-    plt.ylabel('F1 Score')
-    plt.legend()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     
     plt.tight_layout()
     plt.show()
 
-def save_history(history, name):
+def save_history(history, name, labels=None):
     """
     Saves the history of a model under results folder.
     Params from params.yaml
@@ -70,24 +52,32 @@ def save_history(history, name):
     Inputs:
     history - history object for model
     name - name of model
+    labels - labels of test metrics if test data
     """
-    print(history)
     pattern = r'\((\d+)\)'
-    history_df = pd.DataFrame(history.history)
+    # If training history object has been passed
+    if not(labels):
+        history_df = pd.DataFrame(history.history)
+        h_type = 'train'
+    else:
+        history_df = pd.DataFrame(history, columns=labels)
+        h_type = 'test'
+
     history_num = 0
-    history_name = f"{name}({history_num})_train-history"
+    history_name = f"{name}({history_num})_{h_type}-history"
     for file in os.listdir(params['results_path']):
         if file == history_name:
             num = int(re.findall(pattern(file))[0])
             if num > history_num:
                 history_num = num + 1
     
-    history_name = f"{name}({history_num})_train-history"
+    history_name = f"{name}({history_num})_{h_type}-history"
     history_df.to_csv(os.path.join(params['results_path'], history_name), index=False)
 
 def demo(model_path):
     """
     Retrieves frames, labels from generator, evaluates with model, displays image and evaluations.
+    Frames iterated by 'n' key. Frame saved by 'enter' key. Quit by 'q' key.
 
     Inputs:
     model_path - Path to model to be demoed
@@ -109,6 +99,7 @@ def demo(model_path):
             # Break the loop on 'q' key press
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+
+    cv2.destroyAllWindows()
     
-#show_results(path="E:/results_ResNet50_train_history")
-demo("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/ResNet50(0).keras")
