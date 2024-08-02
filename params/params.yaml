@@ -1,19 +1,23 @@
 origin_path:
-  data: "E:/SENG402/data/videos"
-  annotations: "E:/SENG402/data/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/data/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/data/annotations"
 training_path:
-  data: "E:/SENG402/training/videos"
-  annotations: "E:/SENG402/training/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/training/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/training/annotations"
 validation_path:
-  data: "E:/SENG402/validation/videos"
-  annotations: "E:/SENG402/validation/annotations"
+  data: "/media/rho66/KINGSTON/SENG402/validation/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/validation/annotations"
 testing_path:
-  data: "E:/SENG402/testing/videos"
-  annotations: "E:/SENG402/testing/annotations"
-results_path: "/results"
+  data: "/media/rho66/KINGSTON/SENG402/testing/videos"
+  annotations: "/media/rho66/KINGSTON/SENG402/testing/annotations"
+results_path: "results"
 file_formats:
   data_type: ".mp4"
   annotation_type: ".txt"
 settings:
   frame_rate: 25
   colour_chanel: "BGR"
+> git pull --tags origin chloec-80
+From https://github.com/rory-holmes/SENG402
+ * branch            chloec-80  -> FETCH_HEAD
+hint: Y

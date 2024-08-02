@@ -85,45 +85,21 @@ def demo(model_path):
     model = load_model(model_path)
     org = (50, 50)  # Bottom-left corner of the text string in the image
     font = cv2.FONT_HERSHEY_SIMPLEX  # Font type
-    font_scale = 0.3  # Font scale factor
+    font_scale = 0.4  # Font scale factor
     color = (255, 0, 0)  # Color in BGR (Blue, Green, Red)
     thickness = 2  # Thickness of the lines used to draw a text
-    frame_counter = 0  # To count the frames
-
-    data_gen = vp.data_generator("testing", 1)
-    
-    # Initialize first frame
-    X_batch, y_batch = next(data_gen)
-    y_pred_prob = model.predict(X_batch)
-    y_pred = np.where(y_pred_prob > 0.5, 1, 0)
-    X_batch_display = X_batch[0].copy()
-    cv2.putText(X_batch_display, f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
-    cv2.putText(X_batch_display, f"Actual: {y_batch}", (50, 100), font, font_scale, color, thickness, cv2.LINE_AA)
-
-    while True:
-        cv2.imshow('Frame', X_batch_display)
-        key = cv2.waitKey(1) & 0xFF
+    for X_batch, y_batch in vp.data_generator("testing", 1):
+        y_pred_prob = model.predict(X_batch)
+        y_pred = np.where(y_pred_prob > 0.5, 1, 0)
         
-        if key == ord('q'): 
+        cv2.putText(X_batch[0], f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.putText(X_batch[0], f"Actual: {y_batch}", (50, 100), font, font_scale, color, thickness, cv2.LINE_AA)
+        cv2.imshow('Frame', X_batch[0])        
+
+            # Break the loop on 'q' key press
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
-        if key == ord('n'):  
-            try:
-                X_batch, y_batch = next(data_gen)
-            except StopIteration:
-                break
 
-            y_pred_prob = model.predict(X_batch)
-            y_pred = np.where(y_pred_prob > 0.5, 1, 0)
-            X_batch_display = X_batch[0].copy()
-            cv2.putText(X_batch_display, f"Predicted: {y_pred}", org, font, font_scale, color, thickness, cv2.LINE_AA)
-            cv2.putText(X_batch_display, f"Actual: {y_batch}", (50, 100), font, font_scale, color, thickness, cv2.LINE_AA)
-            frame_counter += 1
-
-        if key == 13:  # Enter key
-            image_path = f"saved_frame_{frame_counter}.png"
-            cv2.imwrite(image_path, X_batch_display)
-            print(f"Image saved as {image_path}")
 
     cv2.destroyAllWindows()
     
