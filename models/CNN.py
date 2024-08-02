@@ -1,5 +1,5 @@
 import numpy as np
-from keras import layers, applications, metrics
+from keras import layers, applications, metrics, callbacks
 from keras.optimizers import Adam
 import sys
 sys.path.append('utils')
@@ -69,7 +69,8 @@ class CNN:
             validation_data=validation_data,
             epochs=self.epochs,
             steps_per_epoch=steps_per_epoch,
-            validation_steps=validation_steps
+            validation_steps=validation_steps,
+            callbacks=[CustomCallback()]
         )
         self.model.save(f"{self.name}.keras")
         return history, self.name
@@ -140,6 +141,40 @@ class VGG16_Model(CNN):
             classifier_activation="softmax",
         )
         super().__init__(base_model)
+
+class UnfreezeOnMinLoss(callbacks.Callback):
+    """
+    Unfreeze's models layers when loss is at its min, if performance decreases after freezing, stops training.
+
+    Inputs:
+    patience - Number of epochs to wait after min has been hit. After this number of no improvment, unfreezes layers or halts training.
+    unfreeze_layers - Amount of layers to unfreeze after patience has been used.
+    """
+    def __init__(self, patience=0, unfreeze_layers=0):
+        self.patience = patience
+        self.best_weights=None
+
+    def on_train_begin(self, logs=None):
+        self.wait = 0
+        self.stopped_epoch = 0
+        self.best = np.Inf
+
+    def on_epoch_end(self, epoch, logs=None):
+        current = logs.get("loss")
+        if np.less(current, self.best):
+            self.best = current
+            self.wait = 0
+            self.best_weights = self.model.get_weights()
+        else:
+            self.wait += 1
+            if self.wait >= self.patience:
+                self.stopped_epoch = epoch
+                self.model.stop_training = True
+                logging.info(f"Restoring model weights from the end of the best epoch")
+                self.model.set_weights(self.best_weights)
+    
+    def on_train_end(self, logs=None):
+        return super().on_train_end(logs)
 
 def freeze_layers(network, n=300):
     """

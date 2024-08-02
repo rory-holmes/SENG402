@@ -48,5 +48,5 @@ def train_models(models):
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    train_models([VGG16_Model, ResNet50_Model, InceptionResNetV2_Model])
+    train_models([InceptionResNetV2_Model])
     #testing("VGG_16.keras")
