@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import yaml
 import pandas as pd
 import os
-import video_process as vp
+import utils.video_process as vp
 import re
 import numpy as np
 import cv2
@@ -44,35 +44,24 @@ def graph_results(csv_path1, csv_path2, csv_path3):
     plt.tight_layout()
     plt.show()
 
-def save_history(history, name, labels=None):
+def get_logger_name(name):
     """
-    Saves the history of a model under results folder.
+    Iterates over saved models to return a unique file name for logging.
     Params from params.yaml
 
     Inputs:
-    history - history object for model
     name - name of model
-    labels - labels of test metrics if test data
     """
     pattern = r'\((\d+)\)'
-    # If training history object has been passed
-    if not(labels):
-        history_df = pd.DataFrame(history.history)
-        h_type = 'train'
-    else:
-        history_df = pd.DataFrame(history, columns=labels)
-        h_type = 'test'
-
     history_num = 0
-    history_name = f"{name}({history_num})_{h_type}-history"
     for file in os.listdir(params['results_path']):
-        if file == history_name:
-            num = int(re.findall(pattern(file))[0])
-            if num > history_num:
+        if name in file:
+            num = int(re.findall(pattern, file)[0])
+            if num >= history_num:
                 history_num = num + 1
     
-    history_name = f"{name}({history_num})_{h_type}-history"
-    history_df.to_csv(os.path.join(params['results_path'], history_name), index=False)
+    history_name = f"{name}({history_num})_training-history"
+    return history_name
 
 def demo(model_path):
     """
