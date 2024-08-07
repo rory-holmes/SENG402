@@ -60,7 +60,7 @@ def get_logger_name(name):
             if num >= history_num:
                 history_num = num + 1
     
-    history_name = f"{name}({history_num})_training-history"
+    history_name = f"{name}({history_num})"
     return history_name
 
 def demo(model_path):

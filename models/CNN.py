@@ -25,6 +25,7 @@ class CNN:
     Contains methods for compiling, training, and testing.
     """
     def __init__(self, base_model):
+        self.name = gh.get_logger_name(self.name)
         self.training_data = []
         self.validation_data = []
         self.model = None
@@ -65,7 +66,7 @@ class CNN:
         logging.info("Extracting validation data")
         validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
-        csv_logger = CSVLogger(f"{gh.get_logger_name(self.name)}.log")
+        csv_logger = CSVLogger(f"{self.name}_training-history.log")
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
@@ -75,32 +76,13 @@ class CNN:
             callbacks=[UnfreezeOnMinLoss(), csv_logger]
         )
         self.model.save(f"{self.name}.keras")
-        return history, self.name
 
     def test(self, made_model=None):
         # If using a premade model, not integrated into pipeline
-        if made_model == None:
-            model = self.model
-        else:
-            model = load_model(made_model)
-
-        true_labels = []
-        predictions = []
-        # Loop through testing data
-        for X_batch, y_batch in vp.data_generator("testing", self.batch_size):
-            y_pred_prob = model.predict(X_batch)
-            y_pred = np.where(y_pred_prob > 0.5, 1, 0)
-            true_labels.extend(y_batch)
-            predictions.extend(y_pred)
-
-        true_labels = np.array(true_labels)
-        predictions = np.array(predictions)
-
-        accuracy = accuracy_score(true_labels, predictions)
-        # For multi-class classification:
-        precision = precision_score(true_labels, predictions, average='macro')
-        recall = recall_score(true_labels, predictions, average='macro')
-        gh.save_history(np.array([accuracy, precision, recall]).T, labels=['Accruacy', 'Precision', 'Recall'])
+        if made_model != None:
+            self.model = load_model(made_model)
+        csv_logger = CSVLogger(f"{self.name}_testing-history.log")
+        self.model.evaluate(vp.data_generator("testing", self.batch_size), callbacks=[csv_logger])
 
 class ResNet50_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
