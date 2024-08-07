@@ -65,14 +65,14 @@ class CNN:
         logging.info("Extracting validation data")
         validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
-        csv_logger = CSVLogger(f"{self.name}")
+        csv_logger = CSVLogger(f"{gh.get_logger_name(self.name)}.log")
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
             epochs=self.epochs,
             steps_per_epoch=steps_per_epoch,
             validation_steps=validation_steps,
-            callbacks=[UnfreezeOnMinLoss(), CSVLogger]
+            callbacks=[UnfreezeOnMinLoss(), csv_logger]
         )
         self.model.save(f"{self.name}.keras")
         return history, self.name
@@ -163,6 +163,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
         self.best = np.Inf
 
     def on_epoch_end(self, epoch, logs=None):
+        logs['layers_unfrozen'] = self.current_frozen
         current = logs.get("loss")
         if np.less(current, self.best):
             self.best = current
