@@ -29,7 +29,7 @@ def tearDownTestSuite():
     Delete all files within and the 'test_suite' dir
     """
     if os.path.exists(params['results_path']):
-        for filename in params['results_path']:
+        for filename in os.listdir(params['results_path']):
             if 'InceptionResNetV2(90' in filename:
                 file_path = os.path.join(params['results_path'], filename)
                 os.unlink(file_path)

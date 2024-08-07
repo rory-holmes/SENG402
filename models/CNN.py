@@ -1,6 +1,7 @@
 import numpy as np
 from keras import layers, applications, metrics, callbacks
 from keras.optimizers import Adam
+from keras.callbacks import CSVLogger
 import sys
 sys.path.append('utils')
 sys.path.append('params')
@@ -64,13 +65,14 @@ class CNN:
         logging.info("Extracting validation data")
         validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
+        csv_logger = CSVLogger(f"{self.name}")
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
             epochs=self.epochs,
             steps_per_epoch=steps_per_epoch,
             validation_steps=validation_steps,
-            callbacks=[CustomCallback()]
+            callbacks=[UnfreezeOnMinLoss(), CSVLogger]
         )
         self.model.save(f"{self.name}.keras")
         return history, self.name
@@ -152,7 +154,8 @@ class UnfreezeOnMinLoss(callbacks.Callback):
     """
     def __init__(self, patience=0, unfreeze_layers=0):
         self.patience = patience
-        self.best_weights=None
+        self.best_weights = None
+        self.current_frozen = 0
 
     def on_train_begin(self, logs=None):
         self.wait = 0
@@ -165,25 +168,32 @@ class UnfreezeOnMinLoss(callbacks.Callback):
             self.best = current
             self.wait = 0
             self.best_weights = self.model.get_weights()
+            self.unfreeze_more = True
         else:
             self.wait += 1
             if self.wait >= self.patience:
                 self.stopped_epoch = epoch
-                self.model.stop_training = True
-                logging.info(f"Restoring model weights from the end of the best epoch")
-                self.model.set_weights(self.best_weights)
+                if self.unfreeze_more:
+                    self.model = self.unfreeze_layers()
+                    self.unfreeze_more = False
+                else:
+                    self.model.stop_training = True
+                    logging.info(f"Restoring model weights from the end of the best epoch, stopped at epoch {self.stopped_epoch}")
+                    self.model.set_weights(self.best_weights)
     
     def on_train_end(self, logs=None):
         return super().on_train_end(logs)
 
+    def unfreeze_layers(self):
+        """
+        Freezes 'n_to_unfreeze' more layers of the network for finetuning
+        """
+        self.current_frozen += int(model_params['n_to_unfreeze'])
+        for layer in self.model.layers[-self.current_frozen:]:
+            layer.trainable = True
+
 def freeze_layers(network, n=300):
-    """
-    Freezes n amount of layers of the network given for training
-    
-    Inputs:
-    network - the CNN to freeze
-    n - the quantity of layers to freeze
-    """
+
     # Call before compiling
     for layer in network.layers[:n]:
         layer.trainable = False
