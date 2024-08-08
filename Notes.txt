@@ -9,9 +9,9 @@ For evaluations:
     Use cross entropy loss function, gets raw output. Can see if learning or overfitting.
     Confusion matrix. F1 score.
     
-Future models:
-    inceptionResnetV2
-    VGG16
+Future plan:
+    Make custom callback, when loss isnt decreasing too much, start unfreezing the model and training, do this recursively until model performance decreases on unseen data.
+    
 
 Save checkpoint with callback usage:
     https://www.tensorflow.org/tutorials/keras/save_and_load

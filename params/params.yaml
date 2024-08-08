@@ -17,7 +17,3 @@ file_formats:
 settings:
   frame_rate: 25
   colour_chanel: "BGR"
-> git pull --tags origin chloec-80
-From https://github.com/rory-holmes/SENG402
- * branch            chloec-80  -> FETCH_HEAD
-hint: Y

@@ -8,7 +8,7 @@ from models.CNN import *
 import tensorflow as tf
 import logging
 
-with open("params\params.yaml", "r") as f:
+with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
 def testing(model_path):
@@ -48,5 +48,5 @@ def train_models(models):
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    train_models([VGG16_Model, ResNet50_Model, InceptionResNetV2_Model])
-    #testing("VGG_16.keras")
+    #train_models([InceptionResNetV2_Model])
+    testing("InceptionResNetV2.keras")
