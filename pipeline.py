@@ -15,7 +15,7 @@ def testing(model_path):
     """
     Tests premade model, saves under results folder
 
-    Inputs:
+    Inputs:a
     model_path - path to premade model
 
     """
@@ -29,9 +29,9 @@ def forward_pass(model):
     model - model to be trained
     """
     fh.split_data()
-    history, name = model.train()
-    gh.save_history(history, name)
+    model.train()
     logging.info(f"Testing {str(model.name)}")
+    model.test()
 
 def train_models(models):
     """
