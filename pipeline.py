@@ -15,7 +15,7 @@ def testing(model_path):
     """
     Tests premade model, saves under results folder
 
-    Inputs:
+    Inputs:a
     model_path - path to premade model
 
     """
