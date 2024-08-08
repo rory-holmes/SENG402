@@ -24,8 +24,8 @@ class CNN:
     Class to be passed pre-trained models, initialises values based on the model_params file.
     Contains methods for compiling, training, and testing.
     """
-    def __init__(self, base_model):
-        self.name = gh.get_logger_name(self.name)
+    def __init__(self, base_model, name):
+        self.name = gh.get_logger_name(name)
         self.training_data = []
         self.validation_data = []
         self.model = None
@@ -33,6 +33,8 @@ class CNN:
         self.batch_size = model_params['batch_size']
         self.num_classes = model_params["num_classes"]
         self.learning_rate = model_params['learning_rate']
+
+        freeze_layers(base_model)
 
         x = base_model.output
         x = layers.GlobalAveragePooling2D()(x)
@@ -47,13 +49,13 @@ class CNN:
         Compiles model.
         Params from model_params.yaml
         """
-        
         self.model.compile(
             optimizer= Adam(learning_rate=self.learning_rate),
             loss= model_params["loss"],
             metrics=['accuracy', metrics.Precision(), metrics.Recall()
             ]
         )
+        
 
     def train(self):
         """
@@ -86,7 +88,6 @@ class CNN:
 
 class ResNet50_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        self.name = "ResNet50"
         base_model = applications.ResNet50(
             include_top=False,
             weights=pretrained_weights,
@@ -96,11 +97,10 @@ class ResNet50_Model(CNN):
             classes=7,
             classifier_activation="softmax",
         )
-        super().__init__(base_model)
+        super().__init__(base_model, "ResNet50")
 
 class InceptionResNetV2_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        self.name = "InceptionResNetV2"
         base_model = applications.InceptionResNetV2(
             include_top=False,
             weights=pretrained_weights,
@@ -110,11 +110,10 @@ class InceptionResNetV2_Model(CNN):
             classes=7,
             classifier_activation="softmax",
         )
-        super().__init__(base_model)
+        super().__init__(base_model, "InceptionResNetV2")
 
 class VGG16_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
-        self.name = "VGG_16"
         base_model = applications.VGG16(
             include_top=False,
             weights=pretrained_weights,
@@ -124,7 +123,7 @@ class VGG16_Model(CNN):
             classes=7,
             classifier_activation="softmax",
         )
-        super().__init__(base_model)
+        super().__init__(base_model, "VGG_16")
 
 class UnfreezeOnMinLoss(callbacks.Callback):
     """
@@ -134,10 +133,11 @@ class UnfreezeOnMinLoss(callbacks.Callback):
     patience - Number of epochs to wait after min has been hit. After this number of no improvment, unfreezes layers or halts training.
     unfreeze_layers - Amount of layers to unfreeze after patience has been used.
     """
-    def __init__(self, patience=0, unfreeze_layers=0):
+    def __init__(self, patience=0):
         self.patience = patience
         self.best_weights = None
         self.current_frozen = 0
+        self.unfreeze_more = False
 
     def on_train_begin(self, logs=None):
         self.wait = 0
@@ -146,6 +146,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         logs['layers_unfrozen'] = self.current_frozen
+        logs['restored_weights_to'] = False
         current = logs.get("loss")
         if np.less(current, self.best):
             self.best = current
@@ -157,11 +158,12 @@ class UnfreezeOnMinLoss(callbacks.Callback):
             if self.wait >= self.patience:
                 self.stopped_epoch = epoch
                 if self.unfreeze_more:
-                    self.model = self.unfreeze_layers()
+                    self.unfreeze_layers()
                     self.unfreeze_more = False
                 else:
                     self.model.stop_training = True
                     logging.info(f"Restoring model weights from the end of the best epoch, stopped at epoch {self.stopped_epoch}")
+                    logs['restored_weights_to'] = self.stopped_epoch
                     self.model.set_weights(self.best_weights)
     
     def on_train_end(self, logs=None):
@@ -175,8 +177,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
         for layer in self.model.layers[-self.current_frozen:]:
             layer.trainable = True
 
-def freeze_layers(network, n=300):
-
+def freeze_layers(network):
     # Call before compiling
-    for layer in network.layers[:n]:
+    for layer in network.layers:
         layer.trainable = False
