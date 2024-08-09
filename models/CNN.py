@@ -147,7 +147,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         logs['layers_unfrozen'] = self.current_frozen
         logs['restored_weights_to'] = False
-        current = logs.get("loss")
+        current = logs.get("loss")#TODO change to value loss?
         if np.less(current, self.best):
             self.best = current
             self.wait = 0
