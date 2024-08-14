@@ -10,6 +10,7 @@ import utils.global_helpers as gh
 from keras.models import Model, load_model
 import yaml
 import logging
+import os
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 
 with open("params\model_params.yaml", "r") as f:
@@ -68,7 +69,7 @@ class CNN:
         logging.info("Extracting validation data")
         validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
-        csv_logger = CSVLogger(f"{self.name}_training-history.log")
+        csv_logger = CSVLogger(os.path.join(params['results_path'], f"{self.name}_training-history.log"))
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
@@ -77,7 +78,7 @@ class CNN:
             validation_steps=validation_steps,
             callbacks=[UnfreezeOnMinLoss(), csv_logger]
         )
-        self.model.save(f"{self.name}.keras")
+        self.model.save(os.path.join(params['results_path'], f"{self.name}.keras"))
 
     def test(self, made_model=None):
         # If using a premade model, not integrated into pipeline
@@ -133,8 +134,8 @@ class UnfreezeOnMinLoss(callbacks.Callback):
     patience - Number of epochs to wait after min has been hit. After this number of no improvment, unfreezes layers or halts training.
     unfreeze_layers - Amount of layers to unfreeze after patience has been used.
     """
-    def __init__(self, patience=0):
-        self.patience = patience
+    def __init__(self):
+        self.patience = model_params['patience']
         self.best_weights = None
         self.current_frozen = 0
         self.unfreeze_more = False
@@ -147,7 +148,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         logs['layers_unfrozen'] = self.current_frozen
         logs['restored_weights_to'] = False
-        current = logs.get("loss")#TODO change to value loss?
+        current = logs.get("val_loss")
         if np.less(current, self.best):
             self.best = current
             self.wait = 0
