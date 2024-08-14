@@ -51,6 +51,8 @@ def data_generator(folder_path, batch_size):
                 #logging.info(f"{i}/{len(frames)}")
                 if len(batch_frames) == len(batch_labels):
                     yield (np.array(batch_frames), np.array(batch_labels))
+
+        #TODO Implement shuffling of training data
         if folder_path == "testing":
             break
 

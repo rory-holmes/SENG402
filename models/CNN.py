@@ -13,8 +13,11 @@ import logging
 import os
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 
-with open("params\model_params.yaml", "r") as f:
+with open("params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
+
+with open("params/params.yaml", "r") as f:
+    params = yaml.load(f, Loader=yaml.SafeLoader)
 
 img_height = model_params["image_height"]
 img_width = model_params["image_width"]
@@ -84,6 +87,7 @@ class CNN:
         # If using a premade model, not integrated into pipeline
         if made_model != None:
             self.model = load_model(made_model)
+        #TODO Update to save testing data
         csv_logger = CSVLogger(f"{self.name}_testing-history.log")
         self.model.evaluate(vp.data_generator("testing", self.batch_size), callbacks=[csv_logger])
 
@@ -128,9 +132,9 @@ class VGG16_Model(CNN):
 
 class UnfreezeOnMinLoss(callbacks.Callback):
     """
-    Unfreeze's models layers when loss is at its min, if performance decreases after freezing, stops training.
+    Unfreeze's models layers when validation loss is at its min, if performance decreases after freezing, stops training.
 
-    Inputs:
+    Inputs - from model_params:
     patience - Number of epochs to wait after min has been hit. After this number of no improvment, unfreezes layers or halts training.
     unfreeze_layers - Amount of layers to unfreeze after patience has been used.
     """
@@ -154,13 +158,14 @@ class UnfreezeOnMinLoss(callbacks.Callback):
             self.wait = 0
             self.best_weights = self.model.get_weights()
             self.unfreeze_more = True
+            self.stopped_epoch = epoch
         else:
             self.wait += 1
             if self.wait >= self.patience:
-                self.stopped_epoch = epoch
                 if self.unfreeze_more:
                     self.unfreeze_layers()
                     self.unfreeze_more = False
+                    self.wait = 0
                 else:
                     self.model.stop_training = True
                     logging.info(f"Restoring model weights from the end of the best epoch, stopped at epoch {self.stopped_epoch}")
@@ -179,6 +184,9 @@ class UnfreezeOnMinLoss(callbacks.Callback):
             layer.trainable = True
 
 def freeze_layers(network):
+    """
+    
+    """
     # Call before compiling
     for layer in network.layers:
         layer.trainable = False
