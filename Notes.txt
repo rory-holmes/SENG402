@@ -11,7 +11,7 @@ For evaluations:
     
 Future plan:
     Make custom callback, when loss isnt decreasing too much, start unfreezing the model and training, do this recursively until model performance decreases on unseen data.
-    
+    Gradually reduce learning rate with optimizers.schedules
 
 Save checkpoint with callback usage:
     https://www.tensorflow.org/tutorials/keras/save_and_load
