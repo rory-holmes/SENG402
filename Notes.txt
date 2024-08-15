@@ -12,6 +12,7 @@ For evaluations:
 Future plan:
     Make custom callback, when loss isnt decreasing too much, start unfreezing the model and training, do this recursively until model performance decreases on unseen data.
     Gradually reduce learning rate with optimizers.schedules
+    Remove all frames where tools do not corolate well with colorectal surgery, potentially remove frames where its not in the body?
 
 Save checkpoint with callback usage:
     https://www.tensorflow.org/tutorials/keras/save_and_load
