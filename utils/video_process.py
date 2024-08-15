@@ -4,6 +4,7 @@ import os
 import logging
 import glob
 import numpy as np
+import random
 
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -42,8 +43,10 @@ def data_generator(folder_path, batch_size):
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     logging.info(f"\n  Data generator running for {folder_path}")
+    
+    data = zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path)))
     while True:
-        for video, file in zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))):
+        for video, file in random.shuffle(data):
             #logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
             labels_path = os.path.join(annotation_path, file)
