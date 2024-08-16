@@ -19,7 +19,8 @@ def testing(model_path):
     model_path - path to premade model
 
     """
-    CNN().test(made_model=model_path)
+    #load_model(model_path).evaluate(vp.data_generator("testing", model_params['batch_size']))
+    test_with_predict(model_path)
 
 def forward_pass(model):
     """
@@ -49,4 +50,4 @@ def train_models(models):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     train_models([InceptionResNetV2_Model])
-    #testing("InceptionResNetV2.keras")
+    #testing("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/InceptionResNetV2(1).keras")
