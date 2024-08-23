@@ -25,7 +25,7 @@ This code focuses on assessing surgical skill within colorectal surgery. Althoug
     ```sh
     npm install
     ```
- 5. Install the [cholec80 dataset](http://camma.u-strasbg.fr/datasets).
+ 5. Install the [cholec80 dataset](http://camma.u-strasbg.fr/datasets). Or Endovis15*
 
 ## Usage:
 
