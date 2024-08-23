@@ -1,5 +1,5 @@
 import numpy as np
-from keras import layers, applications, metrics, callbacks
+from keras import layers, applications, metrics, callbacks, backend
 from keras.optimizers import Adam
 from keras.callbacks import CSVLogger
 import sys
@@ -11,7 +11,7 @@ from keras.models import Model, load_model
 import yaml
 import logging
 import os
-from sklearn.metrics import precision_score, recall_score, accuracy_score
+from sklearn.metrics import precision_score, recall_score, accuracy_score, confusion_matrix
 
 with open("params/model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -28,7 +28,7 @@ class CNN:
     Class to be passed pre-trained models, initialises values based on the model_params file.
     Contains methods for compiling, training, and testing.
     """
-    def __init__(self, base_model, name):
+    def __init__(self, base_model=None, name=None):
         self.name = gh.get_logger_name(name)
         self.training_data = []
         self.validation_data = []
@@ -56,7 +56,7 @@ class CNN:
         self.model.compile(
             optimizer= Adam(learning_rate=self.learning_rate),
             loss= model_params["loss"],
-            metrics=['accuracy', metrics.Precision(), metrics.Recall()
+            metrics=['accuracy', metrics.Precision(), metrics.Recall(), metrics.F1Score(average=None, num_classes=7)
             ]
         )
         
@@ -166,6 +166,7 @@ class UnfreezeOnMinLoss(callbacks.Callback):
                     self.unfreeze_layers()
                     self.unfreeze_more = False
                     self.wait = 0
+                    backend.set_value(self.model.optimizer.learning_rate, 0.00001)
                 else:
                     self.model.stop_training = True
                     logging.info(f"Restoring model weights from the end of the best epoch, stopped at epoch {self.stopped_epoch}")
@@ -190,3 +191,28 @@ def freeze_layers(network):
     # Call before compiling
     for layer in network.layers:
         layer.trainable = False
+
+def test_with_predict(model):
+    model = load_model(model)
+    true_labels = []
+    predictions = []
+    # Loop through testing data
+    for X_batch, y_batch in vp.data_generator("testing", model_params['batch_size']):
+        y_pred = model.predict(X_batch)
+        y_pred = np.where(y_pred > 0.5, 1, 0)
+        true_labels.extend(y_batch)
+        predictions.extend(y_pred)
+    #print(true_labels)
+    #print(predictions)
+    true_labels = np.array(true_labels)
+    predictions = np.array(predictions)
+    cm = confusion_matrix(true_labels, predictions)
+    accuracy = accuracy_score(true_labels, predictions)
+    # For multi-class classification:
+    precision = precision_score(true_labels, predictions, average='macro')
+    recall = recall_score(true_labels, predictions, average='macro')
+    print("Accuracy", accuracy)
+    print("Precision", precision)
+    print("Recall", recall)
+    print("Confusion Matrix:", cm)
+    #print(np.array([accuracy, precision, recall, cm]).T, labels=['Accruacy', 'Precision', 'Recall', "Confusion Matrix"])

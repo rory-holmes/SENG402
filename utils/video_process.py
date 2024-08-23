@@ -44,9 +44,10 @@ def data_generator(folder_path, batch_size):
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     logging.info(f"\n  Data generator running for {folder_path}")
     
-    data = zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path)))
+    data = list(zip(sorted(os.listdir(video_path)), sorted(os.listdir(annotation_path))))
     while True:
-        for video, file in random.shuffle(data):
+        random.shuffle(data)
+        for video, file in data:
             #logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
             labels_path = os.path.join(annotation_path, file)
@@ -55,7 +56,6 @@ def data_generator(folder_path, batch_size):
                 if len(batch_frames) == len(batch_labels):
                     yield (np.array(batch_frames), np.array(batch_labels))
 
-        #TODO Implement shuffling of training data
         if folder_path == "testing":
             break
 
@@ -75,7 +75,7 @@ def get_steps(folder_path):
         with open(file_path, 'r') as file:
             lines = file.readlines()
             steps += len(lines)
-    return steps/model_params['batch_size']
+    return steps//model_params['batch_size']
 
 def get_training_validation_steps():
     """
