@@ -5,6 +5,7 @@ import logging
 import glob
 import numpy as np
 import random
+import openpyxl
 
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -163,3 +164,38 @@ def resize_frame(frame):
         frame = cv2.resize(frame, (n_h, n_w)) /255
     return frame
 
+def extract_phase(video_name):
+    """
+    Extracts video phase data in seconds from Colorectal Annotations document
+    """
+    phase_data = None
+    path = os.path.join(params['phase_annotations_path'], r"Colorectal-Annotations-V2.xlsx")
+    obj = openpyxl.load_workbook(path)
+    for row in obj.active.iter_rows(values_only=True): 
+        if row[0] and row[0].strip() == video_name:
+            phase_data = row
+            break
+
+    if not(phase_data):
+        raise ValueError("Video name not found")
+    
+    if phase_data[2] == 1:
+        #Time retaction start	Time dissection start	Time vessel ligated	  Completing dissection
+        return phase_data[8:16:2]
+    
+def get_current_phase(current_frame, phase_data):
+    """
+    Returns a one-hot encoding of what the current frame is on
+    """
+    one_hot = [0 for _ in range(len(phase_data))]
+    current_second = current_frame/params['settings']['phase_frame_rate']
+    for i in range(len(phase_data)-1, -1, -1):
+        if current_second >= phase_data[i]:
+            one_hot[i] = 1
+            break
+    if i == 0:
+        one_hot[0] = 1
+
+    return one_hot
+    
+print(get_current_phase(30.26*25, (12.08, 12.5, 30.26, 30.34)))
