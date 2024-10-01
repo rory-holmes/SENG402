@@ -1,0 +1,12 @@
+image_width: 256
+image_height: 256
+channels: 3
+num_classes: 7
+epochs: 50
+batch_size: 8
+training_split: 77
+learning_rate: 0.0001
+n_to_unfreeze: 50
+patience: 2
+loss: "binary_crossentropy"
+metrics: ["accuracy", "BinaryCrossentropy"]

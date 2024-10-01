@@ -1,0 +1,19 @@
+origin_path:
+  data: "E:/SENG402/data/videos"
+  annotations: "E:/SENG402/data/annotations"
+training_path:
+  data: "E:/SENG402/training/videos"
+  annotations: "E:/SENG402/training/annotations"
+validation_path:
+  data: "E:/SENG402/validation/videos"
+  annotations: "E:/SENG402/validation/annotations"
+testing_path:
+  data: "E:/SENG402/testing/videos"
+  annotations: "E:/SENG402/testing/annotations"
+results_path: "results"
+file_formats:
+  data_type: ".mp4"
+  annotation_type: ".txt"
+settings:
+  frame_rate: 25
+  colour_chanel: "BGR"

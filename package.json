@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "yaml": "^6.0.1",
+    "numpy": "^1.26.4",
+    "matplotlib": "^3.8.4",
+    "keras.models": "^2.9.0",
+    "opencv-python": "^4.9.0.80",
+    "pandas": "^2.2.2",
+    "keras": "^2.9.0",
+    "keras-models": "0.0.7",
+    "keras.optimizers": "^2.9.0",
+    "scikit-learn": "^1.5.0",
+    "sklearn.metrics": "^1.5.0"
+  }
+}

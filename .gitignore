@@ -1,0 +1,7 @@
+data/**
+training/**
+validation/**
+utils/__pycache__
+models/__pycache__
+tests/__pycache__
+results/**

@@ -1,0 +1,18 @@
+Initial loss function was using sparse cross entropy loss.
+    This was bad as it was throwing a mismatch of labels and logits. The output for this was a probability distribution of target classes.
+    Solution was to change this to binary_crossentropy.
+
+Computer has run out of memory when loading all frames from all the videos.
+    Solution is to alter the pipeline to receive one video at a time.
+
+For evaluations:
+    Use cross entropy loss function, gets raw output. Can see if learning or overfitting.
+    Confusion matrix. F1 score.
+    
+Future plan:
+    Make custom callback, when loss isnt decreasing too much, start unfreezing the model and training, do this recursively until model performance decreases on unseen data.
+    Gradually reduce learning rate with optimizers.schedules
+    Remove all frames where tools do not corolate well with colorectal surgery, potentially remove frames where its not in the body?
+
+Save checkpoint with callback usage:
+    https://www.tensorflow.org/tutorials/keras/save_and_load
