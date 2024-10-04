@@ -206,6 +206,20 @@ def phase_video_generator(video_name):
         frame_index += batch_size*25
         if len(batch_frames) == len(batch_labels):
             yield (np.array(batch_frames), np.array(batch_labels))
-        
 
+def phase_generator(stage):
+    if stage == "training":
+        path = params['training_path']['data']
+    elif stage == "validation":
+        path = params['validation_path']['data']
+    
+    logging.info(f"\n  Data generator running for {path}")
+    
+    data = os.listdir(path)
+    while True:
+        random.shuffle(data)
+        for video in data:
+            for batch in phase_video_generator(video):
+                yield batch
+                
 phase_video_generator(r"Right Hemi 1.mpg")
