@@ -49,11 +49,9 @@ def data_generator(folder_path, batch_size):
     while True:
         random.shuffle(data)
         for video, file in data:
-            #logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
             labels_path = os.path.join(annotation_path, file)
             for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
-                #logging.info(f"{i}/{len(frames)}")
                 if len(batch_frames) == len(batch_labels):
                     yield (np.array(batch_frames), np.array(batch_labels))
 
@@ -142,9 +140,7 @@ def frame_generator(video_path, batch_size):
             if len(frames) == batch_size:
                 yield frames
                 frames = []
-        else:
-            break
-        count += 1
+            count += 1
     cap.release()
     if frames:
         yield frames
@@ -166,7 +162,7 @@ def resize_frame(frame):
 
 def extract_phase(video_name):
     """
-    Extracts video phase data in seconds from Colorectal Annotations document
+    Extracts video phase data in seconds from Colorectal Annotations document based on video name
     """
     phase_data = None
     path = os.path.join(params['phase_annotations_path'], r"Colorectal-Annotations-V2.xlsx")
@@ -185,7 +181,7 @@ def extract_phase(video_name):
     
 def get_current_phase(current_frame, phase_data):
     """
-    Returns a one-hot encoding of what the current frame is on
+    Returns a one-hot encoding of what the current frame is on based on frame index
     """
     one_hot = [0 for _ in range(len(phase_data))]
     current_second = current_frame/params['settings']['phase_frame_rate']
@@ -195,7 +191,21 @@ def get_current_phase(current_frame, phase_data):
             break
     if i == 0:
         one_hot[0] = 1
-
     return one_hot
     
-print(get_current_phase(30.26*25, (12.08, 12.5, 30.26, 30.34)))
+def phase_video_generator(video_name):
+    """
+    Yields batches of frames and labels for the given video
+    """
+    phase_data = extract_phase(video_name)
+    vid_path = os.path.join(params['phase_annotations_path'], video_name)
+    print(vid_path)
+    frame_index = 0
+    for batch_frames in frame_generator(vid_path, batch_size):
+        batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size)]
+        frame_index += batch_size*25
+        if len(batch_frames) == len(batch_labels):
+            yield (np.array(batch_frames), np.array(batch_labels))
+        
+
+phase_video_generator(r"Right Hemi 1.mpg")

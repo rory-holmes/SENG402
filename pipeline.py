@@ -45,9 +45,13 @@ def train_models(models):
         tf.keras.backend.clear_session()
         forward_pass(m())
 
+def model_summary(path):
+    model = load_model(path)
+    print(model.summary())
 #===========================================================================
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    train_models([InceptionResNetV2_Model])
+    model_summary(r"C:\Users\Rory\OneDrive - University of Canterbury\Desktop\University\Year 4\SENG402\results\InceptionResNetV2(0).keras")
+    #train_models([InceptionResNetV2_Model])
     #testing("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/InceptionResNetV2(1).keras")

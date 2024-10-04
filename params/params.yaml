@@ -13,9 +13,10 @@ testing_path:
 results_path: 'results'
 file_formats:
   data_type: '.mp4'
+  phase_data_type: ".mpg"
   annotation_type: '.txt'
 settings:
   frame_rate: 25
   colour_chanel: 'BGR'
   phase_frame_rate: 25
-phase_annotations_path: 'E:\UOC-Colorectal'
+phase_annotations_path: 'E:/UOC-Colorectal'
