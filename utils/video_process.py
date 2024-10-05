@@ -82,6 +82,18 @@ def get_training_validation_steps():
     """
     return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
 
+def get_phase_training_validation_steps():
+
+    def get_phase_steps(folder_path):
+        steps = 0
+        for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
+            video = cv2.VideoCapture(video_name)
+            steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/params['settings']['frame_rate']
+        print(steps//model_params['batch_size'])
+        return steps//model_params['batch_size']
+    
+    return get_phase_steps(params['training_path']['data']), get_phase_steps(params['validation_path']['data'])
+
 def label_generator(path, batch_size):
     """
     Extracts all labels for a video, yields by batch_size. 
@@ -168,12 +180,12 @@ def extract_phase(video_name):
     path = os.path.join(params['phase_annotations_path'], r"Colorectal-Annotations-V2.xlsx")
     obj = openpyxl.load_workbook(path)
     for row in obj.active.iter_rows(values_only=True): 
-        if row[0] and row[0].strip() == video_name:
+        if row[0] and row[0].strip() == video_name.split(".")[0]:
             phase_data = row
             break
 
     if not(phase_data):
-        raise ValueError("Video name not found")
+        raise ValueError(f"Video name not found: {video_name}")
     
     if phase_data[2] == 1:
         #Time retaction start	Time dissection start	Time vessel ligated	  Completing dissection
@@ -193,17 +205,17 @@ def get_current_phase(current_frame, phase_data):
         one_hot[0] = 1
     return one_hot
     
-def phase_video_generator(video_name):
+def phase_video_generator(video_name, path):
     """
     Yields batches of frames and labels for the given video
     """
     phase_data = extract_phase(video_name)
-    vid_path = os.path.join(params['phase_annotations_path'], video_name)
+    vid_path = os.path.join(path, video_name)
     print(vid_path)
     frame_index = 0
-    for batch_frames in frame_generator(vid_path, batch_size):
-        batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size)]
-        frame_index += batch_size*25
+    for batch_frames in frame_generator(vid_path, batch_size*model_params['stack_size']):
+        batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size*model_params['stack_size'])]
+        frame_index += batch_size*25*model_params['stack_size']
         if len(batch_frames) == len(batch_labels):
             yield (np.array(batch_frames), np.array(batch_labels))
 
@@ -219,7 +231,5 @@ def phase_generator(stage):
     while True:
         random.shuffle(data)
         for video in data:
-            for batch in phase_video_generator(video):
+            for batch in phase_video_generator(video, path):
                 yield batch
-                
-phase_video_generator(r"Right Hemi 1.mpg")

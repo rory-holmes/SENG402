@@ -20,3 +20,4 @@ settings:
   colour_chanel: 'BGR'
   phase_frame_rate: 25
 phase_annotations_path: 'E:/UOC-Colorectal'
+phase_videos_path: "E:/UOC-Colorectal/Videos"

@@ -55,6 +55,41 @@ def split_data():
         
     logging.info("  Data has been split")
 
+def split_phase_data():
+    """
+    Splits data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
+    Params from params.yaml
+    """
+    return_phase_data() 
+    split = model_params.get("training_split")
+    origin_data = sorted(os.listdir(params['phase_videos_path']))
+
+    random.shuffle(origin_data)
+    training_amount = round(len(origin_data)*split/100)
+    #Training Data
+    for video in origin_data[:training_amount]:
+        os.rename(os.path.join(params['phase_videos_path'], video), os.path.join(params['training_path']['data'], video))
+        
+    #Validation data
+    for video in origin_data[training_amount:]:
+        os.rename(os.path.join(params['phase_videos_path'], video), os.path.join(params['validation_path']['data'], video))
+        
+    logging.info("  Data has been split")
+
+def return_phase_data():
+    """
+    Returns data from 'training_path'(s) and 'validation_path'(s)  to 'data_path' folder.
+    Params from params.yaml
+    """
+    origin_to_end = {params['training_path']['data']: params['phase_videos_path'],
+                     params['validation_path']['data']: params['phase_videos_path']}
+    
+    for key in origin_to_end:
+        folder = os.listdir(key)
+        for file in folder:
+            os.rename(os.path.join(key, file), os.path.join(origin_to_end[key], file))
+    logging.info("  Returned data")
+
 def return_data():
     """
     Returns data from 'training_path'(s) and 'validation_path'(s)  to 'data_path' folder.

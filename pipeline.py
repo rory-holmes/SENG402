@@ -5,6 +5,7 @@ sys.path.append('models')
 import utils.file_helpers as fh
 import utils.global_helpers as gh
 from models.CNN import *
+from models.PhaseCNN import *
 import tensorflow as tf
 import logging
 
@@ -48,10 +49,17 @@ def train_models(models):
 def model_summary(path):
     model = load_model(path)
     print(model.summary())
+
+def train_phase_model(base_model):
+    fh.return_phase_data()
+    fh.split_phase_data()
+    model = PhasePredictor3DCNN(base_model)
+    model.train()
+    fh.return_phase_data()
 #===========================================================================
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    model_summary(r"C:\Users\Rory\OneDrive - University of Canterbury\Desktop\University\Year 4\SENG402\results\InceptionResNetV2(0).keras")
+    train_phase_model(r"C:\Users\Rory\OneDrive - University of Canterbury\Desktop\University\Year 4\SENG402\results\InceptionResNetV2(0).keras")
     #train_models([InceptionResNetV2_Model])
     #testing("/csse/users/rho66/Desktop/Years/4/SENG402/SENG402/results/InceptionResNetV2(1).keras")
