@@ -11,7 +11,6 @@ from keras.models import Model, load_model
 import yaml
 import logging
 import os
-from sklearn.metrics import precision_score, recall_score, accuracy_score, confusion_matrix
 
 with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)

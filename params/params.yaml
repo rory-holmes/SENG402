@@ -11,6 +11,8 @@ testing_path:
   data: 'E:/SENG402/data/feature_extraction/testing/videos'
   annotations: 'E:/SENG402/data/feature_extraction/testing/annotations'
 results_path: 'results'
+phase_annotations_path: 'E:/SENG402/data/phase_detection/annotations'
+phase_videos_path: "E:/SENG402/data/phase_detection/videos"
 file_formats:
   data_type: '.mp4'
   phase_data_type: ".mpg"
@@ -19,5 +21,3 @@ settings:
   frame_rate: 25
   colour_chanel: 'BGR'
   phase_frame_rate: 25
-phase_annotations_path: 'E:/SENG402/data/phase_detection/annotations'
-phase_videos_path: "E:/SENG402/data/phase_detection/videos"
