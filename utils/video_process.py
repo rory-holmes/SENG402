@@ -89,7 +89,6 @@ def get_phase_training_validation_steps():
         for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
             video = cv2.VideoCapture(video_name)
             steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/params['settings']['frame_rate']
-        print(steps//model_params['batch_size'])
         return steps//model_params['batch_size']
     
     return get_phase_steps(params['training_path']['data']), get_phase_steps(params['validation_path']['data'])
@@ -200,7 +199,7 @@ def get_current_phase(current_frame, phase_data):
     for i in range(len(phase_data)-1, -1, -1):
         if current_second >= phase_data[i]:
             one_hot[i] = 1
-            break
+
     if i == 0:
         one_hot[0] = 1
     return one_hot
@@ -209,15 +208,15 @@ def phase_video_generator(video_name, path):
     """
     Yields batches of frames and labels for the given video
     """
-    phase_data = extract_phase(video_name)
-    vid_path = os.path.join(path, video_name)
-    print(vid_path)
-    frame_index = 0
-    for batch_frames in frame_generator(vid_path, batch_size*model_params['stack_size']):
-        batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size*model_params['stack_size'])]
-        frame_index += batch_size*25*model_params['stack_size']
-        if len(batch_frames) == len(batch_labels):
-            yield (np.array(batch_frames), np.array(batch_labels))
+    if phase_data:
+        phase_data = extract_phase(video_name)
+        vid_path = os.path.join(path, video_name)
+        frame_index = 0
+        for batch_frames in frame_generator(vid_path, batch_size*model_params['stack_size']):
+            batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size*model_params['stack_size'])]
+            frame_index += batch_size*25*model_params['stack_size']
+            if len(batch_frames) == len(batch_labels):
+                yield (np.array(batch_frames), np.array(batch_labels))
 
 def phase_generator(stage):
     if stage == "training":
@@ -233,3 +232,5 @@ def phase_generator(stage):
         for video in data:
             for batch in phase_video_generator(video, path):
                 yield batch
+
+

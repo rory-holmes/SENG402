@@ -1,7 +1,7 @@
 from keras.applications import InceptionResNetV2
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Dense, Input, TimeDistributed, GlobalAveragePooling2D, BatchNormalization
 from keras.models import Model, load_model
-from keras import layers
+from keras import metrics
 import numpy as np
 import sys
 sys.path.append('utils')
@@ -94,7 +94,7 @@ class PhasePredictor3DCNN:
         # Define the model
         model = Model(inputs, outputs, name="2dcnn_phase_predictor")
 
-        model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
+        model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy', metrics.Precision(), metrics.Recall()])
 
         return model
     def extract_features(self, frame):
@@ -153,6 +153,7 @@ class PhasePredictor3DCNN:
                     # Step 2: Stack features into 3D blocks
                     stacked_features, stacked_labels = self.stack_features(features, labels, self.num_frames)
                     yield stacked_features, stacked_labels
+                    
 
         # Wrap the generators with the feature extraction and stacking logic
         train_data = process_batch(train_generator)
@@ -164,7 +165,7 @@ class PhasePredictor3DCNN:
             steps_per_epoch=steps_per_epoch_train,
             validation_data=val_data,
             validation_steps=steps_per_epoch_val,
-            epochs=20,  # Number of epochs can be adjusted
+            epochs=1,  # Number of epochs can be adjusted
             callbacks=[csv_logger],
             batch_size=8
         )
