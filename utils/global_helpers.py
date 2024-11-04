@@ -6,11 +6,12 @@ import re
 import numpy as np
 import cv2
 from keras.models import load_model
-from matplotlib.ticker import MaxNLocator
-import ast
+import video_process as vp
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
+
 tools=['Grasper', 'Bipolar', 'Hook', 'Scissors', 'Clipper', 'Irrigator', 'SpecimenBag']
+
 def graph_results(csv_path):
     """
     Plots the validation accuracy from three csv files on a single graph with different colors.
@@ -71,11 +72,11 @@ def demo(model_path):
     model_path - Path to model to be demoed
     """
     model = load_model(model_path)
-    org = (50, 50)  # Bottom-left corner of the text string in the image
-    font = cv2.FONT_HERSHEY_SIMPLEX  # Font type
-    font_scale = 0.4  # Font scale factor
-    color = (255, 0, 0)  # Color in BGR (Blue, Green, Red)
-    thickness = 2  # Thickness of the lines used to draw a text
+    org = (50, 50)  
+    font = cv2.FONT_HERSHEY_SIMPLEX  
+    font_scale = 0.4  
+    color = (255, 0, 0)  
+    thickness = 2  
     for X_batch, y_batch in vp.data_generator("testing", 1):
         y_pred_prob = model.predict(X_batch)
         y_pred = np.where(y_pred_prob > 0.5, 1, 0)
@@ -90,5 +91,4 @@ def demo(model_path):
 
 
     cv2.destroyAllWindows()
-graph_results('Boom')
-#graph_results(r"C:\Users\Rory\OneDrive - University of Canterbury\Desktop\University\Year 4\SENG402\results\inceptionResults.log")
+#graph_results(r"SENG402\results\inceptionResults.log")

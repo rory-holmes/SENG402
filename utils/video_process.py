@@ -10,7 +10,7 @@ import openpyxl
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params/model_params.yaml", "r") as f:
+with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
@@ -117,7 +117,6 @@ def label_generator(path, batch_size):
         label[-1] = label[-1][0]
         #Lables have a frame annotation
         label = [int(l) for l in label[1:]]
-        #break #TODO Remove this line
         labels.append(label)
         if len(labels) == batch_size:
             yield labels
@@ -219,6 +218,18 @@ def phase_video_generator(video_name, path):
                 yield (np.array(batch_frames), np.array(batch_labels))
 
 def phase_generator(stage):
+    """
+    Extracts all frames and labels within paths provided and converts into tensors, 
+    yields batches of frame, label pairs for training or validation.
+    Params from params.yaml
+
+    Input:
+    folder_path - Either 'training', 'validation', or 'test'
+    batch_size - size of batches yielded
+
+    Yield:
+    (frames, annotations) length of batch_size
+    """
     if stage == "training":
         path = params['training_path']['data']
     elif stage == "validation":

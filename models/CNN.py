@@ -13,7 +13,7 @@ import logging
 import os
 from sklearn.metrics import precision_score, recall_score, accuracy_score, confusion_matrix
 
-with open("params/model_params.yaml", "r") as f:
+with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 with open("params/params.yaml", "r") as f:

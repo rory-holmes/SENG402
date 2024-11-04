@@ -1,15 +1,15 @@
 origin_path:
-  data: 'E:/SENG402/data/videos'
-  annotations: 'E:/SENG402/data/annotations'
+  data: 'E:/SENG402/data/feature_extraction/origin/videos'
+  annotations: 'E:/SENG402/data/feature_extraction/origin/annotations'
 training_path:
-  data: 'E:/SENG402/training/videos'
-  annotations: 'E:/SENG402/training/annotations'
+  data: 'E:/SENG402/data/feature_extraction/training/videos'
+  annotations: 'E:/SENG402/data/feature_extraction/training/annotations'
 validation_path:
-  data: 'E:/SENG402/validation/videos'
-  annotations: 'E:/SENG402/validation/annotations'
+  data: 'E:/SENG402/data/feature_extraction/validation/videos'
+  annotations: 'E:/SENG402/data/feature_extraction/validation/annotations'
 testing_path:
-  data: 'E:/SENG402/testing/videos'
-  annotations: 'E:/SENG402/testing/annotations'
+  data: 'E:/SENG402/data/feature_extraction/testing/videos'
+  annotations: 'E:/SENG402/data/feature_extraction/testing/annotations'
 results_path: 'results'
 file_formats:
   data_type: '.mp4'
@@ -19,5 +19,5 @@ settings:
   frame_rate: 25
   colour_chanel: 'BGR'
   phase_frame_rate: 25
-phase_annotations_path: 'E:/UOC-Colorectal'
-phase_videos_path: "E:/UOC-Colorectal/Videos"
+phase_annotations_path: 'E:/SENG402/data/phase_detection'
+phase_videos_path: "E:/SENG402/data/phase_detection/videos"

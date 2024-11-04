@@ -8,8 +8,11 @@ sys.path.append('params')
 with open("params\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params\model_params.yaml", "r") as f:
-    model_params = yaml.load(f, Loader=yaml.SafeLoader)
+with open("params\feature_model_params.yaml", "r") as f:
+    feature_model = yaml.load(f, Loader=yaml.SafeLoader)
+
+with open("params\phase_model_params.yaml", "r") as f:
+    phase_model = yaml.load(f, Loader=yaml.SafeLoader)
 
 def delete_file_type(path, filetype):
     """
@@ -30,7 +33,7 @@ def split_data():
     Params from params.yaml
     """
     return_data() 
-    split = model_params.get("training_split")
+    split = feature_model.get("training_split")
     origin_data = sorted(os.listdir(params['origin_path']['data']))
     origin_annotations = sorted(os.listdir(params['origin_path']['annotations']))
     videos= []
@@ -61,7 +64,7 @@ def split_phase_data():
     Params from params.yaml
     """
     return_phase_data() 
-    split = model_params.get("training_split")
+    split = phase_model.get("training_split")
     origin_data = sorted(os.listdir(params['phase_videos_path']))
 
     random.shuffle(origin_data)
