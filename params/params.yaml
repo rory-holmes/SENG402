@@ -19,5 +19,5 @@ settings:
   frame_rate: 25
   colour_chanel: 'BGR'
   phase_frame_rate: 25
-phase_annotations_path: 'E:/SENG402/data/phase_detection'
+phase_annotations_path: 'E:/SENG402/data/phase_detection/annotations'
 phase_videos_path: "E:/SENG402/data/phase_detection/videos"
