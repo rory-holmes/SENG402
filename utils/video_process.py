@@ -5,11 +5,12 @@ import logging
 import glob
 import numpy as np
 import random
+import openpyxl
 
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params/model_params.yaml", "r") as f:
+with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
@@ -48,11 +49,9 @@ def data_generator(folder_path, batch_size):
     while True:
         random.shuffle(data)
         for video, file in data:
-            #logging.info(f"\n  Extracting frames from {video} and {file}")
             frames_path = os.path.join(video_path, video)
             labels_path = os.path.join(annotation_path, file)
             for batch_frames, batch_labels in zip(frame_generator(frames_path, batch_size), label_generator(labels_path, batch_size)):
-                #logging.info(f"{i}/{len(frames)}")
                 if len(batch_frames) == len(batch_labels):
                     yield (np.array(batch_frames), np.array(batch_labels))
 
@@ -83,6 +82,17 @@ def get_training_validation_steps():
     """
     return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
 
+def get_phase_training_validation_steps():
+
+    def get_phase_steps(folder_path):
+        steps = 0
+        for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
+            video = cv2.VideoCapture(video_name)
+            steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/params['settings']['frame_rate']
+        return steps//model_params['batch_size']
+    
+    return get_phase_steps(params['training_path']['data']), get_phase_steps(params['validation_path']['data'])
+
 def label_generator(path, batch_size):
     """
     Extracts all labels for a video, yields by batch_size. 
@@ -107,7 +117,6 @@ def label_generator(path, batch_size):
         label[-1] = label[-1][0]
         #Lables have a frame annotation
         label = [int(l) for l in label[1:]]
-        #break #TODO Remove this line
         labels.append(label)
         if len(labels) == batch_size:
             yield labels
@@ -141,9 +150,7 @@ def frame_generator(video_path, batch_size):
             if len(frames) == batch_size:
                 yield frames
                 frames = []
-        else:
-            break
-        count += 1
+            count += 1
     cap.release()
     if frames:
         yield frames
@@ -162,4 +169,79 @@ def resize_frame(frame):
     else: # Else keep BGR
         frame = cv2.resize(frame, (n_h, n_w)) /255
     return frame
+
+def extract_phase(video_name):
+    """
+    Extracts video phase data in seconds from Colorectal Annotations document based on video name
+    """
+    phase_data = None
+    path = os.path.join(params['phase_annotations_path'], r"Colorectal-Annotations-V2.xlsx")
+    obj = openpyxl.load_workbook(path)
+    for row in obj.active.iter_rows(values_only=True): 
+        if row[0] and row[0].strip() == video_name.split(".")[0]:
+            phase_data = row
+            break
+
+    if not(phase_data):
+        raise ValueError(f"Video name not found: {video_name}")
+    
+    if phase_data[2] == 1:
+        #Time retaction start	Time dissection start	Time vessel ligated	  Completing dissection
+        return phase_data[8:16:2]
+    
+def get_current_phase(current_frame, phase_data):
+    """
+    Returns a one-hot encoding of what the current frame is on based on frame index
+    """
+    one_hot = [0 for _ in range(len(phase_data))]
+    current_second = current_frame/params['settings']['phase_frame_rate']
+    for i in range(len(phase_data)-1, -1, -1):
+        if current_second >= phase_data[i]:
+            one_hot[i] = 1
+
+    if i == 0:
+        one_hot[0] = 1
+    return one_hot
+    
+def phase_video_generator(video_name, path):
+    """
+    Yields batches of frames and labels for the given video
+    """
+    if phase_data:
+        phase_data = extract_phase(video_name)
+        vid_path = os.path.join(path, video_name)
+        frame_index = 0
+        for batch_frames in frame_generator(vid_path, batch_size*model_params['stack_size']):
+            batch_labels = [get_current_phase(frame_index + (i*25), phase_data) for i in range(batch_size*model_params['stack_size'])]
+            frame_index += batch_size*25*model_params['stack_size']
+            if len(batch_frames) == len(batch_labels):
+                yield (np.array(batch_frames), np.array(batch_labels))
+
+def phase_generator(stage):
+    """
+    Extracts all frames and labels within paths provided and converts into tensors, 
+    yields batches of frame, label pairs for training or validation.
+    Params from params.yaml
+
+    Input:
+    folder_path - Either 'training', 'validation', or 'test'
+    batch_size - size of batches yielded
+
+    Yield:
+    (frames, annotations) length of batch_size
+    """
+    if stage == "training":
+        path = params['training_path']['data']
+    elif stage == "validation":
+        path = params['validation_path']['data']
+    
+    logging.info(f"\n  Data generator running for {path}")
+    
+    data = os.listdir(path)
+    while True:
+        random.shuffle(data)
+        for video in data:
+            for batch in phase_video_generator(video, path):
+                yield batch
+
 

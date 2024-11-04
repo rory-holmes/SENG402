@@ -2,46 +2,46 @@ import matplotlib.pyplot as plt
 import yaml
 import pandas as pd
 import os
-import utils.video_process as vp
 import re
 import numpy as np
 import cv2
 from keras.models import load_model
-from matplotlib.ticker import MaxNLocator
+import video_process as vp
 
 with open("params/params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-def graph_results(csv_path1, csv_path2, csv_path3):
+tools=['Grasper', 'Bipolar', 'Hook', 'Scissors', 'Clipper', 'Irrigator', 'SpecimenBag']
+def graph_results(csv_path):
     """
     Plots the validation accuracy from three csv files on a single graph with different colors.
     
     Inputs:
     csv_path1, csv_path2, csv_path3 - CSV files containing results to be plotted
     """
-    # Load the CSV files
-    df1 = pd.read_csv(csv_path1)
-    df2 = pd.read_csv(csv_path2)
-    df3 = pd.read_csv(csv_path3)
-    
-    # Plot the data
-    epochs1 = range(1, len(df1) + 1)
-    epochs2 = range(1, len(df2) + 1)
-    epochs3 = range(1, len(df3) + 1)
+    data = {
+        'epoch': [0, 1, 2, 3],
+        'val_accuracy': [0.23, 0.256, 0.253, 0.295],
+        'val_loss': [3.2, 3.04, 2.53, 1.45],
+        'val_precision': [0.98, 0.985, 0.976, 0.98],
+        'val_recall': [0.0124, 0.0167, 0.0234, 0.242]
+    }
 
-    plt.figure(figsize=(14, 8))
-    
-    # Validation Accuracy plot
-    plt.plot(epochs1, df1['val_loss'], 'b', label='InceptionResnetV2')
-    plt.plot(epochs2, df2['val_loss'], 'r', label='ResNet50')
-    plt.plot(epochs3, df3['val_loss'], 'g', label='VGG16')
-    plt.title('Validation Loss over 3 epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    
-    plt.tight_layout()
+    # Convert data to DataFrame
+    df = pd.DataFrame(data)
+
+    # Plot val_accuracy across epochs
+    plt.figure(figsize=(8, 5))
+    plt.plot(df['epoch'], df['val_accuracy'], marker='o', linestyle='-', color='b')
+
+    # Add labels and title
+    plt.xlabel('Epoch')
+    plt.ylabel('Validation Accuracy')
+    plt.title('Validation Accuracy Across Epochs')
+    plt.ylim(0, 1)
+    plt.grid(True)
+
+    # Display the plot
     plt.show()
 
 def get_logger_name(name):
@@ -72,11 +72,11 @@ def demo(model_path):
     model_path - Path to model to be demoed
     """
     model = load_model(model_path)
-    org = (50, 50)  # Bottom-left corner of the text string in the image
-    font = cv2.FONT_HERSHEY_SIMPLEX  # Font type
-    font_scale = 0.4  # Font scale factor
-    color = (255, 0, 0)  # Color in BGR (Blue, Green, Red)
-    thickness = 2  # Thickness of the lines used to draw a text
+    org = (50, 50)  
+    font = cv2.FONT_HERSHEY_SIMPLEX  
+    font_scale = 0.4  
+    color = (255, 0, 0)  
+    thickness = 2  
     for X_batch, y_batch in vp.data_generator("testing", 1):
         y_pred_prob = model.predict(X_batch)
         y_pred = np.where(y_pred_prob > 0.5, 1, 0)
@@ -91,4 +91,4 @@ def demo(model_path):
 
 
     cv2.destroyAllWindows()
-    
+#graph_results(r"SENG402\results\inceptionResults.log")

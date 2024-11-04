@@ -11,9 +11,8 @@ from keras.models import Model, load_model
 import yaml
 import logging
 import os
-from sklearn.metrics import precision_score, recall_score, accuracy_score, confusion_matrix
 
-with open("params/model_params.yaml", "r") as f:
+with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 with open("params/params.yaml", "r") as f:
@@ -87,7 +86,6 @@ class CNN:
         # If using a premade model, not integrated into pipeline
         if made_model != None:
             self.model = load_model(made_model)
-        #TODO Update to save testing data
         csv_logger = CSVLogger(f"{self.name}_testing-history.log")
         self.model.evaluate(vp.data_generator("testing", self.batch_size), callbacks=[csv_logger])
 
@@ -191,28 +189,3 @@ def freeze_layers(network):
     # Call before compiling
     for layer in network.layers:
         layer.trainable = False
-
-def test_with_predict(model):
-    model = load_model(model)
-    true_labels = []
-    predictions = []
-    # Loop through testing data
-    for X_batch, y_batch in vp.data_generator("testing", model_params['batch_size']):
-        y_pred = model.predict(X_batch)
-        y_pred = np.where(y_pred > 0.5, 1, 0)
-        true_labels.extend(y_batch)
-        predictions.extend(y_pred)
-    #print(true_labels)
-    #print(predictions)
-    true_labels = np.array(true_labels)
-    predictions = np.array(predictions)
-    cm = confusion_matrix(true_labels, predictions)
-    accuracy = accuracy_score(true_labels, predictions)
-    # For multi-class classification:
-    precision = precision_score(true_labels, predictions, average='macro')
-    recall = recall_score(true_labels, predictions, average='macro')
-    print("Accuracy", accuracy)
-    print("Precision", precision)
-    print("Recall", recall)
-    print("Confusion Matrix:", cm)
-    #print(np.array([accuracy, precision, recall, cm]).T, labels=['Accruacy', 'Precision', 'Recall', "Confusion Matrix"])
