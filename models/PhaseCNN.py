@@ -11,11 +11,11 @@ import os
 import yaml
 from keras.callbacks import CSVLogger
 
-with open("params/phase_model_params.yaml", "r") as f:
+with open(r"params\\phase_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params/params.yaml", "r") as f:
-    params = yaml.load(f, Loader=yaml.SafeLoader)
+with open(r"params\\paths.yaml", "r") as f:
+    paths = yaml.load(f, Loader=yaml.SafeLoader)
 
 class PhasePredictor3DCNN:
     def __init__(self, base_model):
@@ -125,7 +125,7 @@ class PhasePredictor3DCNN:
         Returns:
             The trained 3D-CNN model.
         """
-        csv_logger = CSVLogger(os.path.join(params['results_path'], f"{self.name}.log"))
+        csv_logger = CSVLogger(os.path.join(paths['results_path'], f"{self.name}.log"))
         train_generator = vp.phase_generator("training")
         val_generator = vp.phase_generator("validation")
 
@@ -164,7 +164,7 @@ class PhasePredictor3DCNN:
             batch_size=model_params['batch_size']
         )
 
-        self.model.save(os.path.join(params['results_path'], self.name))
+        self.model.save(os.path.join(paths['results_path'], self.name))
         return self.model
 
 

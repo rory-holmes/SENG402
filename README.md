@@ -30,7 +30,7 @@ SENG402
 │   └── PhaseCNN.py
 ├── params/                  # Parameter and hyperparameter configuration files
 │   ├── feature_model_params.yaml
-│   ├── params.yaml
+│   ├── paths.yaml
 │   └── phase_model_params.yaml
 ├── results/                 # Storage for model results and logs
 ├── tests/                   # Unit tests
@@ -85,7 +85,7 @@ SENG402
 
 ## Usage:
 
- 1. Ensure pathways within ```params.yaml``` are correct.
+ 1. Ensure pathways within ```paths.yaml``` are correct.
 
  2. Optionally split some data into testing folder manually for testing.
 

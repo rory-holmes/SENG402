@@ -15,8 +15,8 @@ import os
 with open("params/feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params/params.yaml", "r") as f:
-    params = yaml.load(f, Loader=yaml.SafeLoader)
+with open("params/paths.yaml", "r") as f:
+    paths = yaml.load(f, Loader=yaml.SafeLoader)
 
 img_height = model_params["image_height"]
 img_width = model_params["image_width"]
@@ -71,7 +71,7 @@ class CNN:
         logging.info("Extracting validation data")
         validation_data = vp.data_generator('validation', self.batch_size)
         logging.info(f"Training model: {self.name}")
-        csv_logger = CSVLogger(os.path.join(params['results_path'], f"{self.name}_training-history.log"))
+        csv_logger = CSVLogger(os.path.join(paths['results_path'], f"{self.name}_training-history.log"))
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
@@ -80,7 +80,7 @@ class CNN:
             validation_steps=validation_steps,
             callbacks=[UnfreezeOnMinLoss(), csv_logger]
         )
-        self.model.save(os.path.join(params['results_path'], f"{self.name}.keras"))
+        self.model.save(os.path.join(paths['results_path'], f"{self.name}.keras"))
 
     def test(self, made_model=None):
         # If using a premade model, not integrated into pipeline

@@ -6,8 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import utils.file_helpers as fh
 import yaml
 
-with open(r"params\\params.yaml", "r") as f:
-    params = yaml.load(f, Loader=yaml.SafeLoader)
+with open(r"params\\paths.yaml", "r") as f:
+    paths = yaml.load(f, Loader=yaml.SafeLoader)
 
 with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
@@ -18,7 +18,6 @@ def createFakeFiles(path):
     """
     files = []
     for i in range(0,4):
-        print(i)
         files.append(os.path.join(path, f"ThisIsAFakeFile{i}"))
 
     for file in files:
@@ -39,24 +38,24 @@ class TestSringMethods(unittest.TestCase):
     def test_givenData_whenSplitData_thenDataSplitCorrectly(self):
         fh.return_data()
         split = model_params.get("training_split")
-        data_dir = os.listdir(params['origin_data'])
-        training_dir = os.listdir(params['training_data'])
-        validation_dir = os.listdir(params['validation_data'])
-        init_data_length = len([file for file in data_dir if os.path.isfile(os.path.join(params['origin_data'], file))])
-        init_training_length = len([file for file in training_dir if os.path.isfile(os.path.join(params['training_data'], file))])
-        init_validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(params['validation_data'], file))])
+        data_dir = os.listdir(paths['origin_data'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        init_data_length = len([file for file in data_dir if os.path.isfile(os.path.join(paths['origin_data'], file))])
+        init_training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        init_validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
 
         self.assertEqual(init_training_length, 0)
         self.assertEqual(init_validation_length, 0)
 
         fh.split_data()
 
-        data_dir = os.listdir(params['origin_data'])
-        training_dir = os.listdir(params['training_data'])
-        validation_dir = os.listdir(params['validation_data'])
-        data_length = len([file for file in data_dir if os.path.isfile(os.path.join(params['origin_data'], file))])
-        training_length = len([file for file in training_dir if os.path.isfile(os.path.join(params['training_data'], file))])
-        validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(params['validation_data'], file))])
+        data_dir = os.listdir(paths['origin_data'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        data_length = len([file for file in data_dir if os.path.isfile(os.path.join(paths['origin_data'], file))])
+        training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
 
         self.assertEqual(data_length, 0)
         self.assertEqual(training_length, round(init_data_length*split/100))
@@ -65,23 +64,47 @@ class TestSringMethods(unittest.TestCase):
 
     def test_givenData_whenReturnData_thenDataIsReturned(self):
         fh.split_data()
-        data_dir = os.listdir(params['origin_data'])
-        training_dir = os.listdir(params['training_data'])
-        validation_dir = os.listdir(params['validation_data'])
-        init_training_length = len([file for file in training_dir if os.path.isfile(os.path.join(params['training_data'], file))])
-        init_validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(params['validation_data'], file))])
+        data_dir = os.listdir(paths['origin_data'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        init_training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        init_validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
 
         self.assertNotEqual(init_training_length, 0)
         self.assertNotEqual(init_validation_length, 0)
 
         fh.return_data()
 
-        data_dir = os.listdir(params['origin_data'])
-        training_dir = os.listdir(params['training_data'])
-        validation_dir = os.listdir(params['validation_data'])
-        data_length = len([file for file in data_dir if os.path.isfile(os.path.join(params['origin_data'], file))])
-        training_length = len([file for file in training_dir if os.path.isfile(os.path.join(params['training_data'], file))])
-        validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(params['validation_data'], file))])
+        data_dir = os.listdir(paths['origin_data'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        data_length = len([file for file in data_dir if os.path.isfile(os.path.join(paths['origin_data'], file))])
+        training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
+
+        self.assertEqual(data_length, init_training_length+init_validation_length)
+        self.assertEqual(training_length, 0)
+        self.assertEqual(validation_length, 0)
+    
+    def test_givenData_whenReturnPhaseData_thenPhaseDataIsReturned(self):
+        fh.split_data()
+        data_dir = os.listdir(paths['phase'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        init_training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        init_validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
+
+        self.assertNotEqual(init_training_length, 0)
+        self.assertNotEqual(init_validation_length, 0)
+
+        fh.return_data()
+
+        data_dir = os.listdir(paths['origin_data'])
+        training_dir = os.listdir(paths['training_data'])
+        validation_dir = os.listdir(paths['validation_data'])
+        data_length = len([file for file in data_dir if os.path.isfile(os.path.join(paths['origin_data'], file))])
+        training_length = len([file for file in training_dir if os.path.isfile(os.path.join(paths['training_data'], file))])
+        validation_length = len([file for file in validation_dir if os.path.isfile(os.path.join(paths['validation_data'], file))])
 
         self.assertEqual(data_length, init_training_length+init_validation_length)
         self.assertEqual(training_length, 0)
