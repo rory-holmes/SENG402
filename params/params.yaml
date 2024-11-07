@@ -10,7 +10,4 @@ paths:
   results_path: 'results/'
   phase_annotations_path: 'data/phase_detection/annotations'
   phase_videos_path: "data/phase_detection/videos"
-settings:
-  frame_rate: 25
-  colour_chanel: 'BGR'
-  phase_frame_rate: 25
+

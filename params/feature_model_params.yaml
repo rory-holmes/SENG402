@@ -11,3 +11,4 @@ patience: 2
 loss: "binary_crossentropy"
 metrics: ["accuracy", "BinaryCrossentropy"]
 stack_size: 5
+frame_rate: 25

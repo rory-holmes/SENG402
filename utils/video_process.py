@@ -13,10 +13,13 @@ with open(r"params\\params.yaml", "r") as f:
 with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
+with open(r"params\\phase_model_params.yaml", "r") as f:
+    phase_model_params = yaml.load(f, Loader=yaml.SafeLoader)
+
 n_w = model_params.get("image_width")
 n_h = model_params.get("image_height")
-colour_chanel = params['settings']["colour_chanel"]
-frame_rate = params['settings']["frame_rate"]
+colour_chanel = "BGR"
+frame_rate = model_params["frame_rate"]
 batch_size = model_params['batch_size']
 
 def data_generator(folder_path, batch_size):
@@ -88,7 +91,7 @@ def get_phase_training_validation_steps():
         steps = 0
         for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
             video = cv2.VideoCapture(video_name)
-            steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/params['settings']['frame_rate']
+            steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/phase_model_params['frame_rate']
         return steps//model_params['batch_size']
     
     return get_phase_steps(params['training_data']), get_phase_steps(params['validation_data'])
@@ -194,7 +197,7 @@ def get_current_phase(current_frame, phase_data):
     Returns a one-hot encoding of what the current frame is on based on frame index
     """
     one_hot = [0 for _ in range(len(phase_data))]
-    current_second = current_frame/params['settings']['phase_frame_rate']
+    current_second = current_frame/phase_model_params['frame_rate']
     for i in range(len(phase_data)-1, -1, -1):
         if current_second >= phase_data[i]:
             one_hot[i] = 1
