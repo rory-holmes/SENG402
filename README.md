@@ -1,5 +1,5 @@
 # SENG402
-Operative skill assesment for lacroscopic colorectal surgery
+Operative skill assessment for laparoscopic colorectal surgery
 
 ## Table of Contents
 [Description](#description)
