@@ -21,7 +21,7 @@ with open("params/params.yaml", "r") as f:
 img_height = model_params["image_height"]
 img_width = model_params["image_width"]
 channels = model_params["channels"]
-    
+
 class CNN:
     """
     Class to be passed pre-trained models, initialises values based on the model_params file.
@@ -89,19 +89,6 @@ class CNN:
         csv_logger = CSVLogger(f"{self.name}_testing-history.log")
         self.model.evaluate(vp.data_generator("testing", self.batch_size), callbacks=[csv_logger])
 
-class ResNet50_Model(CNN):
-    def __init__(self, pretrained_weights="imagenet"):
-        base_model = applications.ResNet50(
-            include_top=False,
-            weights=pretrained_weights,
-            input_tensor=None,
-            input_shape=(img_height, img_width, channels),
-            pooling=None,
-            classes=7,
-            classifier_activation="softmax",
-        )
-        super().__init__(base_model, "ResNet50")
-
 class InceptionResNetV2_Model(CNN):
     def __init__(self, pretrained_weights="imagenet"):
         base_model = applications.InceptionResNetV2(
@@ -114,20 +101,7 @@ class InceptionResNetV2_Model(CNN):
             classifier_activation="softmax",
         )
         super().__init__(base_model, "InceptionResNetV2")
-
-class VGG16_Model(CNN):
-    def __init__(self, pretrained_weights="imagenet"):
-        base_model = applications.VGG16(
-            include_top=False,
-            weights=pretrained_weights,
-            input_tensor=None,
-            input_shape=(img_height, img_width, channels),
-            pooling=None,
-            classes=7,
-            classifier_activation="softmax",
-        )
-        super().__init__(base_model, "VGG_16")
-
+        
 class UnfreezeOnMinLoss(callbacks.Callback):
     """
     Unfreeze's models layers when validation loss is at its min, if performance decreases after freezing, stops training.
@@ -184,7 +158,10 @@ class UnfreezeOnMinLoss(callbacks.Callback):
 
 def freeze_layers(network):
     """
-    
+    Freezes all the layers of the given network
+
+    Inputs: 
+        network: Model to be frozen
     """
     # Call before compiling
     for layer in network.layers:
