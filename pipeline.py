@@ -9,23 +9,27 @@ from models.PhaseCNN import *
 import tensorflow as tf
 import logging
 
-with open("params/params.yaml", "r") as f:
-    params = yaml.load(f, Loader=yaml.SafeLoader)
+with open("params/paths.yaml", "r") as f:
+    paths = yaml.load(f, Loader=yaml.SafeLoader)
 
-def train_feature_extractor(model):
+def train_feature_extractor(model, test=False):
     """
     Forward pass of model training
 
     Inputs:
-    model - model to be trained
+        model: Model to be trained
+        test: If True, tests the model after training
 
     Returns:
-    model - The trained model
+        model: The trained model
     """
     fh.split_data()
     model.train()
     logging.info(f"Testing {str(model.name)}")
-    model.test()
+
+    if test:
+        model.test()
+
     return model
 
 def train_phase_detector(base_model):
@@ -33,10 +37,10 @@ def train_phase_detector(base_model):
     Trains the phase detection model with the given feature extractor:
     
     Inputs:
-    base_model - Trained Feature extractor
+        base_model: Trained Feature extractor
 
     Returns:
-    model - The trained model
+        model: The trained model
     """
     fh.split_phase_data()
     model = PhasePredictor3DCNN(base_model)

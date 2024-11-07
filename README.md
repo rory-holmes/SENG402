@@ -24,7 +24,6 @@ SENG402
 ├── .venv/                   # Virtual environment
 ├── documentation/           # Project documentation
 │   ├── seng402_final_Holmes-Rory.pdf
-│   └── Showcase_Holmes-Rory.pptx
 ├── models/                  # Model scripts
 │   ├── CNN.py
 │   └── PhaseCNN.py
