@@ -7,10 +7,10 @@ import numpy as np
 import random
 import openpyxl
 
-with open("params/params.yaml", "r") as f:
+with open(r"params\\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params/feature_model_params.yaml", "r") as f:
+with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
@@ -33,14 +33,14 @@ def data_generator(folder_path, batch_size):
     (frames, annotations) length of batch_size
     """
     if folder_path == 'training':
-        video_path = params['training_path']['data']
-        annotation_path = params['training_path']['annotations']
+        video_path = params['training_data']
+        annotation_path = params['training_annotations']
     elif folder_path == 'validation':
-        video_path = params['validation_path']['data']
-        annotation_path = params['validation_path']['annotations']
+        video_path = params['validation_data']
+        annotation_path = params['validation_annotations']
     elif folder_path == 'testing':
-        video_path = params['testing_path']['data']
-        annotation_path = params['testing_path']['annotations']
+        video_path = params['testing_data']
+        annotation_path = params['testing_annotations']
     else:
         raise ValueError("Incorrect value for 'folder_path' must be 'training', 'validation', or 'testing'")
     logging.info(f"\n  Data generator running for {folder_path}")
@@ -80,7 +80,7 @@ def get_training_validation_steps():
     """
     Returns training steps, validation steps
     """
-    return (get_steps(params['training_path']['annotations']), get_steps(params['validation_path']['annotations']))
+    return (get_steps(params['training_annotations']), get_steps(params['validation_annotations']))
 
 def get_phase_training_validation_steps():
 
@@ -91,7 +91,7 @@ def get_phase_training_validation_steps():
             steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/params['settings']['frame_rate']
         return steps//model_params['batch_size']
     
-    return get_phase_steps(params['training_path']['data']), get_phase_steps(params['validation_path']['data'])
+    return get_phase_steps(params['training_data']), get_phase_steps(params['validation_data'])
 
 def label_generator(path, batch_size):
     """
@@ -231,9 +231,9 @@ def phase_generator(stage):
     (frames, annotations) length of batch_size
     """
     if stage == "training":
-        path = params['training_path']['data']
+        path = params['training_data']
     elif stage == "validation":
-        path = params['validation_path']['data']
+        path = params['validation_data']
     
     logging.info(f"\n  Data generator running for {path}")
     

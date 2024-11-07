@@ -8,7 +8,7 @@ import utils.file_helpers as fh
 import numpy as np
 import yaml
 
-with open("params/feature_model_params.yaml", "r") as f:
+with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")

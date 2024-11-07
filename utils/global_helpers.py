@@ -8,7 +8,7 @@ import cv2
 from keras.models import load_model
 import video_process as vp
 
-with open("params/params.yaml", "r") as f:
+with open(r"params\\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
 tools=['Grasper', 'Bipolar', 'Hook', 'Scissors', 'Clipper', 'Irrigator', 'SpecimenBag']

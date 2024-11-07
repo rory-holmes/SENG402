@@ -1,22 +1,15 @@
-origin_path:
-  data: 'E:/SENG402/data/feature_extraction/origin/videos'
-  annotations: 'E:/SENG402/data/feature_extraction/origin/annotations'
-training_path:
-  data: 'E:/SENG402/data/feature_extraction/training/videos'
-  annotations: 'E:/SENG402/data/feature_extraction/training/annotations'
-validation_path:
-  data: 'E:/SENG402/data/feature_extraction/validation/videos'
-  annotations: 'E:/SENG402/data/feature_extraction/validation/annotations'
-testing_path:
-  data: 'E:/SENG402/data/feature_extraction/testing/videos'
-  annotations: 'E:/SENG402/data/feature_extraction/testing/annotations'
-results_path: 'results'
-phase_annotations_path: 'E:/SENG402/data/phase_detection/annotations'
-phase_videos_path: "E:/SENG402/data/phase_detection/videos"
-file_formats:
-  data_type: '.mp4'
-  phase_data_type: ".mpg"
-  annotation_type: '.txt'
+paths:
+  origin_data: 'data/feature_extraction/origin/videos'
+  origin_annotations: 'data/feature_extraction/origin/annotations'
+  training_data: 'data/feature_extraction/training/videos'
+  training_annotations: 'data/feature_extraction/training/annotations'
+  validation_data: 'data/feature_extraction/validation/videos'
+  validation_annotations: 'data/feature_extraction/validation/annotations'
+  testing_data: 'data/feature_extraction/testing/videos'
+  testing_annotations: 'data/feature_extraction/testing/annotations'
+  results_path: 'results/'
+  phase_annotations_path: 'data/phase_detection/annotations'
+  phase_videos_path: "data/phase_detection/videos"
 settings:
   frame_rate: 25
   colour_chanel: 'BGR'

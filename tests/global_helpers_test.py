@@ -6,10 +6,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import utils.global_helpers as gh
 import yaml
 
-with open("params\params.yaml", "r") as f:
+with open(r"params\\params.yaml", "r") as f:
     params = yaml.load(f, Loader=yaml.SafeLoader)
 
-with open("params\feature_model_params.yaml", "r") as f:
+with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 
