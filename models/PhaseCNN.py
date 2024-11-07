@@ -6,6 +6,7 @@ import sys
 sys.path.append('utils')
 sys.path.append('params')
 import utils.video_process as vp
+import utils.global_helpers as gh
 import os
 import yaml
 from keras.callbacks import CSVLogger
@@ -27,7 +28,7 @@ class PhasePredictor3DCNN:
         self.feature_extractor = self.build_feature_extractor(base_model)
         self.num_frames = model_params['stack_size']
         self.num_classes = model_params['num_classes']
-
+        self.name = gh.get_logger_name("PhasePredictor")
         self.model = self.build_model()
 
     def build_feature_extractor(self, base_model):
@@ -42,6 +43,7 @@ class PhasePredictor3DCNN:
         """        
         base_model = load_model(base_model)
         # Remove the global average pooling and final dense layers
+        # Removing global average pooling to retain spatial information for 3D-CNN processing.
         feature_output = base_model.get_layer('conv_7b_ac').output 
         
         feature_extractor = Model(inputs=base_model.input, outputs=feature_output)
@@ -59,6 +61,7 @@ class PhasePredictor3DCNN:
         input_shape_2d = (self.num_frames, 6, 6, 1536)  # 6x6 is the InceptionResNetV2 feature maps for each frame
         inputs = Input(shape=input_shape_2d)
 
+        # TimeDistributed applies layers to each frame independently, preserving temporal structure for 3D-CNN.
         x = TimeDistributed(Conv2D(filters=64, kernel_size=3, activation="relu", padding="same"))(inputs)
         x = TimeDistributed(MaxPooling2D(pool_size=2, padding="same"))(x)
         x = TimeDistributed(BatchNormalization())(x)
@@ -82,7 +85,7 @@ class PhasePredictor3DCNN:
 
         outputs = TimeDistributed(Dense(units=self.num_classes, activation="softmax"))(x)
 
-        model = Model(inputs, outputs, name="2dcnn_phase_predictor")
+        model = Model(inputs, outputs, name=self.name)
         model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy', metrics.Precision(), metrics.Recall()])
 
         return model
@@ -122,7 +125,7 @@ class PhasePredictor3DCNN:
         Returns:
             The trained 3D-CNN model.
         """
-        csv_logger = CSVLogger(os.path.join(params['results_path'], f"3dcnn_training-history.log"))
+        csv_logger = CSVLogger(os.path.join(params['results_path'], f"{self.name}.log"))
         train_generator = vp.phase_generator("training")
         val_generator = vp.phase_generator("validation")
 
@@ -151,18 +154,17 @@ class PhasePredictor3DCNN:
         train_data = process_batch(train_generator)
         val_data = process_batch(val_generator)
 
-        # Train the model using the processed data
         self.model.fit(
             train_data,
             steps_per_epoch=steps_per_epoch_train,
             validation_data=val_data,
             validation_steps=steps_per_epoch_val,
-            epochs=model_params['epochs'],  # Number of epochs can be adjusted
+            epochs=model_params['epochs'],  
             callbacks=[csv_logger],
             batch_size=model_params['batch_size']
         )
 
-        self.model.save(os.path.join(params['results_path'], "3dCNN.keras"))
+        self.model.save(os.path.join(params['results_path'], self.name))
         return self.model
 
 
