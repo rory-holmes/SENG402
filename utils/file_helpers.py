@@ -19,8 +19,8 @@ def delete_file_type(path, filetype):
     Deletes files of type filetype in path
 
     Inputs:
-    path - paths.yaml header - validation
-    filetype - in the format .filetype - .txt
+        path - paths.yaml header - validation
+        filetype - in the format .filetype - .txt
     """
     data = os.listdir(paths.get(path))
     for file in data:
@@ -29,7 +29,7 @@ def delete_file_type(path, filetype):
 
 def split_data():
     """
-    Splits data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
+    Splits feature extraction data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
     Params from paths.yaml
     """
     return_data() 
@@ -54,7 +54,7 @@ def split_data():
 
 def split_phase_data():
     """
-    Splits data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
+    Splits phase data from 'Data' folder into 'Training' and 'Validation' folders based off of 'split'
     Params from paths.yaml
     """
     return_data(phase=True) 
@@ -76,6 +76,9 @@ def split_phase_data():
 def return_data(phase=False):
     """
     Returns data from 'training_path'(s) and 'validation_path'(s)  to 'data_path' folder.
+    Inputs:
+        phase: If phase is true returns phase data
+
     Params from params.yaml
     """
     # If returning phase data
