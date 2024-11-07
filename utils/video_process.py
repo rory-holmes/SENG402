@@ -134,29 +134,28 @@ def resize_frame(frame):
         frame = cv2.resize(frame, (n_h, n_w)) /255
     return frame
 
+def get_steps(folder_path):
+    """
+    Gets the length of all files found within folder_path and divides by batch_size.
+    Params from paths.yaml
+
+    Inputs:
+    folder_path - Path to the folder used to calculate length of files 
+
+    Returns:
+    Steps necessary based on folder_path size        
+    """
+    steps = 0
+    for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            steps += len(lines)
+    return steps//model_params['batch_size']
+
 def get_training_validation_steps():
     """
     Returns training steps, validation steps for feature training
     """
-
-    def get_steps(folder_path):
-        """
-        Gets the length of all files found within folder_path and divides by batch_size.
-        Params from paths.yaml
-
-        Inputs:
-        folder_path - Path to the folder used to calculate length of files 
-
-        Returns:
-        Steps necessary based on folder_path size        
-        """
-        steps = 0
-        for file_path in glob.glob(os.path.join(folder_path, '*.txt')):
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
-                steps += len(lines)
-        return steps//model_params['batch_size']
-    
     return (get_steps(paths['training_annotations']), get_steps(paths['validation_annotations']))
 
 # Phase detection --------------------------------------------------------------------
@@ -165,17 +164,20 @@ def phase_generator(stage):
     """
     Extracts all frames and labels within paths provided and converts into tensors, 
     yields batches of frame, label pairs for training or validation.
-    Params from params.yaml
+    Params from paths.yaml
 
     Input:
-        folder_path - Either 'training', 'validation', or 'test'
-        batch_size - size of batches yielded
+        stage - Either 'training', 'validation', or 'test'
 
     Yield:
         (frames, annotations) length of batch_size
     """
-    path = paths.get(f"{stage}_data")
     logging.info(f"\n  Data generator running for {path}")
+
+    try:
+        path = paths.get(f"{stage}_data")
+    except Exception:
+        raise ValueError("Incorrect value for 'stage' must be 'training', 'validation', or 'testing'")
     
     data = os.listdir(path)
     while True:
@@ -235,26 +237,26 @@ def get_current_phase(current_frame, phase_data):
         one_hot[0] = 1
     return one_hot
 
+def get_phase_steps(folder_path):
+    """
+    Counts the frames per frame rate of the videos in the specified dir
+
+    Inputs:
+        folder_path: Specified folder_path
+    
+    Returns:
+        Steps found in the specified dir
+    """
+    steps = 0
+    for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
+        video = cv2.VideoCapture(video_name)
+        steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/phase_model_params['frame_rate']
+    return steps//model_params['batch_size']
+
 def get_phase_training_validation_steps():
     """
     Returns training steps, validations steps for phase training
     """
-    def get_phase_steps(folder_path):
-        """
-        Counts the frames per frame rate of the videos in the specified dir
-
-        Inputs:
-            folder_path: Specified folder_path
-        
-        Returns:
-            Steps found in the specified dir
-        """
-        steps = 0
-        for video_name in glob.glob(os.path.join(folder_path, '*.mpg')):
-            video = cv2.VideoCapture(video_name)
-            steps += video.get(cv2.CAP_PROP_FRAME_COUNT)/phase_model_params['frame_rate']
-        return steps//model_params['batch_size']
-    
     return get_phase_steps(paths['training_data']), get_phase_steps(paths['validation_data'])
 
 

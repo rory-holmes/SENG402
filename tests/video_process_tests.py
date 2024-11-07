@@ -7,9 +7,13 @@ import utils.video_process as vp
 import utils.file_helpers as fh
 import numpy as np
 import yaml
+import cv2
 
 with open(r"params\\feature_model_params.yaml", "r") as f:
     model_params = yaml.load(f, Loader=yaml.SafeLoader)
+
+with open(r"params\\phase_model_params.yaml", "r") as f:
+    phase_model_params = yaml.load(f, Loader=yaml.SafeLoader)
 
 n_w = model_params.get("image_width")
 n_h = model_params.get("image_height")
@@ -28,6 +32,20 @@ def createFolderToTestSteps():
         file1.writelines(content)
     with open(file2_name, 'w') as file2:
         file2.writelines(content)
+
+def createVideoToTestPhaseSteps():
+    """
+    Creates a test_suite dir and adds a fake Video to test the amount of steps
+    """
+    os.makedirs('test_suite', exist_ok=True)
+    filename = os.path.join('test_suite', 'testVideo.mpg')
+    fourcc = cv2.VideoWriter_fourcc(*'MPG1')
+    out = cv2.VideoWriter(filename, fourcc, 25, (250, 250))
+
+    for i in range(50):
+        frame = np.full((250, 250, 3), (i % 256, (i * 2) % 256, (i * 3) % 256), dtype=np.uint8)
+        out.write(frame)
+    out.release()
 
 def tearDownTestSuite():
     """
@@ -54,6 +72,19 @@ class TestStringMethods(unittest.TestCase):
             self.assertEqual(len(frames), batch_size)
             break
         fh.return_data()
+    
+    def test_givenIncorrectPath_whenPhaseDataGenerator_thenValueError(self):
+        with self.assertRaises(ValueError):
+            _, _ = vp.phase_generator('Incorrect/Path')
+    
+    def test_givenCorrectPath_whenPhaseDataGenerator_thenBatchReturned(self):
+        fh.split_phase_data()
+        batch_size = phase_model_params['batch_size']
+        for frames, labels in vp.phase_generator('training'):
+            self.assertEqual(len(frames), len(labels))
+            self.assertEqual(len(frames), batch_size)
+            break
+        fh.return_data(phase=True)
 
     def test_givenFrame_whenResizeFrame_thenFrameResized(self):
         frame = np.random.randint(0, 256, (300, 300, 3), dtype=np.uint8)
@@ -64,6 +95,12 @@ class TestStringMethods(unittest.TestCase):
         createFolderToTestSteps()
         steps = vp.get_steps('test_suite')
         self.assertEqual(steps, 30/model_params['batch_size'])
+        tearDownTestSuite()
+
+    def test_givenFakeVideo_whenGetPhaseSteps_thenCorrectStepsReturned(self):
+        createVideoToTestPhaseSteps()
+        steps = vp.get_steps('test_suite')
+        self.assertEqual(steps, 50)
         tearDownTestSuite()
 
 if __name__ == '__main__':
